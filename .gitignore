@@ -1,0 +1,6 @@
+Manifest.toml
+test*.jl
+.vscode/
+.DS_Store
+coverage/
+.claude-workspace/

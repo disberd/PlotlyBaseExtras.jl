@@ -1,0 +1,147 @@
+const _container_css = read(joinpath(@__DIR__, "..", "lib", "container.css"), String)
+const html_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "html.js"), String))
+const container_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "container.js"), String))
+const clipboard_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "clipboard.js"), String))
+const resizer_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "resizer.js"), String))
+const pluto_adapter_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "pluto_adapter.js"), String))
+
+const _default_script_contents = htl_js.([
+	# Provide our own `html` DOM helper, shadowing Pluto's injected one (see html.js)
+	html_script,
+	# Pluto-agnostic core: makeContainer/updatePlotData (container.js),
+	# addClipboardFunctionality (clipboard.js), addResizeFunctionality (resizer.js).
+	container_script,
+	clipboard_script,
+	resizer_script,
+	# The container stylesheet, bound to `css` for the adapter's makeContainer call.
+	JS("const css = `" * _container_css * "`"),
+	# The only Pluto-aware piece: wires `this`/`invalidation`/published data into
+	# the core (see pluto_adapter.js). A vscode_adapter.js would replace just this.
+	pluto_adapter_script,
+])
+
+"""
+	PlutoPlot(p::Plot; kwargs...)
+
+A wrapper around `PlotlyBase.Plot` to provide optimized visualization within
+Pluto notebooks exploiting `@htl` from HypertextLiteral.
+
+# Fields
+- `Plot::PlotlyBase.Plot`
+- `plotly_listeners::Dict{String, Vector{HypertextLitera.JavaScript}}`
+- `js_listeners::Dict{String, Vector{HypertextLitera.JavaScript}}`
+- `classList::Vector{String}`
+- `script_contents::ScriptContents`
+
+Once the wrapper has been created, the underlying `Plot` object can be accessed
+from the `Plot` field of the `PlutoPlot` object.
+
+Custom listeners to [plotly
+events](https://plotly.com/javascript/plotlyjs-events/) are saved inside the
+`plotly_listeners` field and can be added to the `PlutoPlot` as *javascript*
+functions using the [`add_plotly_listener!`](@ref) function.
+
+Custom listeners to normal javascript events can instead be added to the
+`PlutoPlot` as *javascript* functions using the [`add_js_listener!`](@ref)
+function.
+
+Multiple listeners can be associated to each event, and they are executed in the
+order they are added.
+
+A list of custom CSS classes can be added to the PlutoPlot by using the
+[`add_class!`](@ref) and [`remove_class!`](@ref) functions.
+
+Finally, the contents of the script tag generating the plot are stored in the
+field `script_contents` which is of type [`ScriptContents`](@ref). The elements
+of `script_contents` are written serially inside the javascript script tag. The
+displayed plot can be customized by modifying the elements of this field.
+
+# Examples
+```julia
+p = PlutoPlot(Plot(rand(10)))
+add_plotly_listener!(p, "plotly_click", "e => console.log(e)")
+add_class!(p, "custom_class")
+```
+
+See also: [`ScriptContents`](@ref), [`add_js_listener!`](@ref), [`add_plotly_listener!`](@ref)
+"""
+Base.@kwdef struct PlutoPlot
+	Plot::PlotlyBase.Plot
+	plotly_listeners::Dict{String, Vector{JS}} = Dict{String, Vector{JS}}()
+	js_listeners::Dict{String, Vector{JS}} = Dict{String, Vector{JS}}()
+	classList::Vector{String} = String[]
+	script_contents::ScriptContents = ScriptContents(deepcopy(_default_script_contents))
+end
+PlutoPlot(p::PlotlyBase.Plot; kwargs...) = PlutoPlot(;kwargs..., Plot = p)
+
+# Getter that extract the underlying Plot object data
+function Base.getproperty(p::PlutoPlot, s::Symbol)
+	if hasfield(Plot, s)
+		getfield(getfield(p, :Plot), s)
+	else
+		getfield(p, s)
+	end
+end
+
+function plot(args...;kwargs...) 
+	@nospecialize
+	PlutoPlot(Plot(args...;kwargs...))
+end
+
+# This function extracts the toImageButtonOptions as a Dict
+"""
+	get_image_options(p::Union{Plot, PlutoPlot})::Dict{Symbol, Any}
+Extract the dictionary of image options that are stored in the
+`toImageButtonOptions` of the `PlotConfig` object embedded in the `Plot`.
+
+If not explicitly set, the image options are empty by default when creating a Plot object.
+
+See also: [`change_image_options!`](@ref)
+"""
+function get_image_options(p::Union{Plot, PlutoPlot}) 
+    dict = something(p.config.toImageButtonOptions, Dict())
+    return Dict{Symbol, Any}((Symbol(k) => v) for (k, v) in dict)
+end
+
+"""
+	change_image_options!(p::Union{Plot, PlutoPlot}; kwargs...)
+
+Returns the input plot `p` after having modified the `toImageButtonOptions` of the
+`PlotConfig` object embedded in the plot. These options are passed to
+the plotly.js library and are used to provide defaults when downloading the plot
+as an image (See the relevant
+[docs](https://plotly.com/julia/configuration-options/#customizing-modebar-download-plot-button)
+for more details.)
+
+If explicitly set, each option will also be used as the default value when
+popping out plot container for customizing size/scale/name before copying to
+clipboard or downloading the image. See [PR
+#22](https://github.com/JuliaPluto/PlutoPlotly.jl/pull/32) of PlutoPlotly for
+more details.
+
+## Keyword Arguments
+- `format`: The format of the exported plot to download. Can be one of "png", "jpeg", "webp", "svg" or "full-json",
+- `width`: An integer specifying the width (in pixels) of the exported plot.
+- `height`: An integer specifying the height (in pixels) of the exported plot.
+- `scale`: Set the scaling for the generated image, keeping the aspect ratio intact (increases the resolution).
+- `filename`: Sets the name of the exported file, the extension will be added automatically based on the chosen `format`.
+"""
+function change_image_options!(p::Union{Plot, PlutoPlot}; kwargs...)
+    # valid_args = (:format, :width, :height, :scale, :setBackground, :imageDataOnly, :filename)
+	# At the moment setBackground and imageDataOnly are not supported.
+    valid_args = (:format, :width, :height, :scale, :filename)
+    invalid_kwargs = setdiff(keys(kwargs), valid_args) |> Tuple
+    isempty(invalid_kwargs) || error("You provided the some invalid keyword arguments.
+Invalid kwargs: $invalid_kwargs
+Possible kwargs: $valid_args")
+    existing_dict = get_image_options(p)
+    new_dict = Dict{Symbol, Any}()
+    for k in valid_args
+        val = get(kwargs, k, get(existing_dict, k, missing))
+        val isa Missing && continue
+        new_dict[k] = val
+    end
+    isempty(new_dict) && return
+    p.config.toImageButtonOptions = new_dict
+    p
+end
