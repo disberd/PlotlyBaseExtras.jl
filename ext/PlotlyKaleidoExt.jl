@@ -1,6 +1,6 @@
 module PlotlyKaleidoExt
 
-using PlutoPlotly: PlutoPlot, get_plotly_version
+using PlotlyBaseExtras: PlotlyPlot, get_plotly_version
 using PlotlyKaleido: savefig, PlotlyKaleido, restart, P, is_running
 
 function get_version_in_kaleido()
@@ -27,7 +27,7 @@ function ensure_correct_version()
     end
 end
 
-function PlotlyKaleido.savefig(io::IO, p::PlutoPlot, args...; kwargs...) 
+function PlotlyKaleido.savefig(io::IO, p::PlotlyPlot, args...; kwargs...) 
     ensure_correct_version()
     savefig(io, p.Plot, args...; kwargs...)
 end

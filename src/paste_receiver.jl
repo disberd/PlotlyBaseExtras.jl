@@ -7,11 +7,11 @@ clipboard button on the plotly modebar.
 With `popped` equals to true (default), the widget will be collapsed and
 represented by a clipboard icon on the top-right of the screen. When clicked
 upon, the container div is expanded and it will contain the last image that has
-been sent to the clipboard from a PlutoPlotly plot.
+been sent to the clipboard from a PlotlyBaseExtras plot.
 """
 plutoplotly_paste_receiver(;popped = true) = @htl("""
 <script src="https://kit.fontawesome.com/087fc9ff41.js" crossorigin="anonymous"></script>
-<paste-receiver class="plutoplotly noimage minimized $(popped ? "popped" : "")">
+<paste-receiver class="plotlyplot noimage minimized $(popped ? "popped" : "")">
   <div class="header">
     <i class="empty"></i>
     <i class="clipboard fa-regular fa-clipboard"></i>
@@ -203,7 +203,7 @@ plutoplotly_paste_receiver(;popped = true) = @htl("""
     justify-content: space-between;
     align-items: center;
   }
-  paste-receiver.plutoplotly {
+  paste-receiver.plotlyplot {
     display: flex;
     background: var(--main-bg-color);
     border: 3px solid var(--kbd-border-color);
@@ -216,7 +216,7 @@ plutoplotly_paste_receiver(;popped = true) = @htl("""
     position: relative;
     overflow: auto;
   }
-  paste-receiver.plutoplotly.popped {
+  paste-receiver.plotlyplot.popped {
     z-index: 1000;
     position: fixed;
     width: 600px;
@@ -224,7 +224,7 @@ plutoplotly_paste_receiver(;popped = true) = @htl("""
     right: 165px;
     top: 62px;
   }
-  paste-receiver.plutoplotly.popped.minimized {
+  paste-receiver.plotlyplot.popped.minimized {
     overflow: visible;
     min-height: 0px;
     height: 0px !important;
@@ -232,16 +232,16 @@ plutoplotly_paste_receiver(;popped = true) = @htl("""
     border: none;
     background-color: transparent;
   }
-  paste-receiver.plutoplotly.popped.minimized .header {
+  paste-receiver.plotlyplot.popped.minimized .header {
     height: 100%;
   }
-  paste-receiver.plutoplotly.popped.minimized *:not(.header) {
+  paste-receiver.plotlyplot.popped.minimized *:not(.header) {
     display: none;
   }
-  paste-receiver.plutoplotly .header:not(:hover) i {
+  paste-receiver.plotlyplot .header:not(:hover) i {
     visibility: hidden
   }
-  paste-receiver.plutoplotly.popped.minimized i.clipboard {
+  paste-receiver.plotlyplot.popped.minimized i.clipboard {
     display: block;
     scale: 1.5;
     transform: translate(-50%, 0);

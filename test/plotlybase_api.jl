@@ -1,13 +1,13 @@
 using Test
 using DataFrames
-using PlutoPlotly
+using PlotlyBaseExtras
 
 function fresh_data()
     t1 = scatter(;y=[1, 2, 3])
     t2 = scatter(;y=[10, 20, 30])
     t3 = scatter(;y=[100, 200, 300])
     l = Layout(;title="Foo")
-    p = Plot([copy(t1), copy(t2), copy(t3)], copy(l)) |> PlutoPlot
+    p = Plot([copy(t1), copy(t2), copy(t3)], copy(l)) |> PlotlyPlot
     t1, t2, t3, l, p
 end
 
@@ -304,7 +304,7 @@ end
         ],
         layout = (hovermode = "unified",)
     )
-    plots = PlutoPlot[
+    plots = PlotlyPlot[
         plot(fig)
         plot((layout = fig.layout, data = fig.data))
         plot((;frames=[], fig...))

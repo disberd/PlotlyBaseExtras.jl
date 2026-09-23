@@ -44,7 +44,7 @@ This is useful for creating heatmaps where values are mapped to a few number of 
 When called with a `ColorScheme` or `Symbol` as first argument, the colors are first sampled using the `sample_colorscheme` function, and then converted to a discrete colorscale.
 
 ```jldoctest
-julia> using PlutoPlotly;
+julia> using PlotlyBaseExtras;
 
 julia> colorscale = discrete_colorscale(:viridis, 5)
 10-element Vector{Tuple{Float64, String}}:

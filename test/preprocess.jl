@@ -1,5 +1,5 @@
 @testitem "Preprocess" begin
-    using PlutoPlotly: _process_with_names, AttrName, _preprocess, AttrName
+    using PlotlyBaseExtras: _process_with_names, AttrName, _preprocess, AttrName
     l = Layout(;
         title_text = "asd",
         title_x = 0.5

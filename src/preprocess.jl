@@ -13,7 +13,7 @@ Base.iterate(n::AttrName, state=1) = state > 1 ? nothing : (n, state + 1)
 
 #=
 This function is basically `_json_lower` from PlotlyBase, but we do it directly
-on the PlutoPlot to avoid the modifying the behavior of `_json_lower` for `Plot`
+on the PlotlyPlot to avoid the modifying the behavior of `_json_lower` for `Plot`
 objects (which is required to modify how matrices are passed to `publish_to_js`).
 
 We now have a complex dispatch to be able to do custom processing for specific
@@ -43,8 +43,8 @@ https://github.com/JuliaPluto/PlutoPlotly.jl/issues/51)
 The various `@nospecialize` below are to avoid exploding compilation given our exponential number of dispatch options, so we only specialize where we need.
 =#
 
-# Main _process_with_names for the PlutoPlot object
-function _process_with_names(pp::PlutoPlot)
+# Main _process_with_names for the PlotlyPlot object
+function _process_with_names(pp::PlotlyPlot)
     p = pp.Plot
     fl = floatval()
     out = Dict(
