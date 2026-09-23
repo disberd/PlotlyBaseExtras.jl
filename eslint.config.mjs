@@ -4,10 +4,15 @@
 // active adapter (pluto_adapter.js) are read by Julia and concatenated into a
 // single <script> that the package injects into the page (see src/show.jl and
 // src/main_struct.jl). They share one lexical scope: per-plot state lives on the
-// CONTAINER element, and the files call each other's top-level functions. The
-// names below are the cross-file + host contract — declaring them keeps
-// `no-undef` useful and doubles as the contract a future non-Pluto (e.g. VSCode)
-// adapter would have to provide in place of pluto_adapter.js.
+// CONTAINER element, and the files call each other's top-level functions.
+//
+// Contract: an adapter calls `renderPlot` with `plot_obj`, `Plotly`, `css`,
+// `plotly_listeners`, `js_listeners` (published by the Julia preamble in
+// src/show.jl and the `css` binding in src/main_struct.jl), and mounts the
+// returned container. Only `pluto_adapter.js` uses Pluto's `invalidation` and
+// `this`. The names below are the cross-file + host contract — declaring them
+// keeps `no-undef` useful and doubles as the contract a future non-Pluto
+// (e.g. VSCode) adapter would have to provide in place of pluto_adapter.js.
 
 const injectedGlobals = {
   // Published data + library (Julia preamble in src/show.jl)
@@ -21,6 +26,8 @@ const injectedGlobals = {
   html: "readonly",
   // Pluto runtime — only pluto_adapter.js touches `invalidation`
   invalidation: "readonly",
+  // Core entry point (container.js); the adapter calls it with the globals above
+  renderPlot: "readonly",
   // Core cross-file functions (defined in one core file, called from another)
   makeContainer: "readonly",
   updatePlotData: "readonly",
