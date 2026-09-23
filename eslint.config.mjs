@@ -10,9 +10,8 @@
 // `plotly_listeners`, `js_listeners` (published by the Julia preamble in
 // src/show.jl and the `css` binding in src/main_struct.jl), and mounts the
 // returned container. Only `pluto_adapter.js` uses Pluto's `invalidation` and
-// `this`. The names below are the cross-file + host contract — declaring them
-// keeps `no-undef` useful and doubles as the contract a future non-Pluto
-// (e.g. VSCode) adapter would have to provide in place of pluto_adapter.js.
+// `this`. The names below are the cross-file and host contract. Declaring them
+// keeps `no-undef` useful.
 
 const injectedGlobals = {
   // Published data + library (Julia preamble in src/show.jl)
@@ -29,8 +28,6 @@ const injectedGlobals = {
   // Core entry point (container.js); the adapter calls it with the globals above
   renderPlot: "readonly",
   // Core cross-file functions (defined in one core file, called from another)
-  makeContainer: "readonly",
-  updatePlotData: "readonly",
   addClipboardFunctionality: "readonly",
   addResizeFunctionality: "readonly",
   getOffsetData: "readonly",
