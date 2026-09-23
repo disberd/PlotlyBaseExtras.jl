@@ -1,8 +1,8 @@
 using Test
-using PlutoPlotly
-using PlutoPlotly: _preprocess, FORCE_FLOAT32, ARTIFACT_VERSION, PLOTLY_VERSION, _process_with_names
-using PlutoPlotly.PlotlyBase: ColorScheme, Colors, Cycler, templates
-using PlutoPlotly.AbstractPlutoDingetjes
+using PlotlyBaseExtras
+using PlotlyBaseExtras: _preprocess, FORCE_FLOAT32, ARTIFACT_VERSION, PLOTLY_VERSION, _process_with_names
+using PlotlyBaseExtras.PlotlyBase: ColorScheme, Colors, Cycler, templates
+using PlotlyBaseExtras.AbstractPlutoDingetjes
 using ScopedValues
 
 p = plot(rand(Int, 4));
@@ -13,13 +13,15 @@ with(FORCE_FLOAT32 => false) do
     @test first(_p[:data])[:y] isa Vector{Int}
 end
 
-@test force_pluto_mathjax_local() === false
+@test force_mathjax_local() === false
 try
-    force_pluto_mathjax_local(true)
-    @test force_pluto_mathjax_local() === true
+    force_mathjax_local(true)
+    @test force_mathjax_local() === true
 finally
-    force_pluto_mathjax_local(false)
+    force_mathjax_local(false)
 end
+@test PlutoPlot === PlotlyPlot
+@test force_pluto_mathjax_local === force_mathjax_local
 
 @test ColorScheme([Colors.RGB(0.0, 0.0, 0.0), Colors.RGB(1.0, 1.0, 1.0)],
 "custom", "twotone, black and white") |> _process_with_names == [(0.0, "rgb(0,0,0)"), (1.0, "rgb(255,255,255)")]
@@ -47,7 +49,7 @@ let p = plot(rand(4))
     @test_throws "invalid keyword arguments" change_image_options!(p; heights = 400)
 end
 
-@test plutoplotly_paste_receiver() isa PlutoPlotly.HypertextLiteral.Result
+@test plutoplotly_paste_receiver() isa PlotlyBaseExtras.HypertextLiteral.Result
 
 @test get_plotly_version() === ARTIFACT_VERSION
 try
@@ -68,7 +70,7 @@ end
             @eval Main module PlutoRunner end
         end
         reference_published = AbstractPlutoDingetjes.Display.published_to_js(Dict("x" => 1))
-        published = PlutoPlotly.maybe_publish_to_js(Dict("x" => 1))
+        published = PlotlyBaseExtras.maybe_publish_to_js(Dict("x" => 1))
         @test typeof(published) === typeof(reference_published)
         called = Ref(false)
         io = IOContext(

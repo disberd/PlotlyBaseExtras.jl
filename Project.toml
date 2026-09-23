@@ -1,5 +1,5 @@
-name = "PlutoPlotly"
-uuid = "8e989ff0-3d88-8e9f-f020-2b208a939ff0"
+name = "PlotlyBaseExtras"
+uuid = "ba01aadf-c838-43fc-827a-f1961e451c7b"
 authors = ["Alberto Mengali <disberd@gmail.com>"]
 version = "0.6.6"
 

@@ -21,7 +21,7 @@ const _default_script_contents = htl_js.([
 ])
 
 """
-	PlutoPlot(p::Plot; kwargs...)
+	PlotlyPlot(p::Plot; kwargs...)
 
 A wrapper around `PlotlyBase.Plot` to provide optimized visualization within
 Pluto notebooks exploiting `@htl` from HypertextLiteral.
@@ -34,21 +34,21 @@ Pluto notebooks exploiting `@htl` from HypertextLiteral.
 - `script_contents::ScriptContents`
 
 Once the wrapper has been created, the underlying `Plot` object can be accessed
-from the `Plot` field of the `PlutoPlot` object.
+from the `Plot` field of the `PlotlyPlot` object.
 
 Custom listeners to [plotly
 events](https://plotly.com/javascript/plotlyjs-events/) are saved inside the
-`plotly_listeners` field and can be added to the `PlutoPlot` as *javascript*
+`plotly_listeners` field and can be added to the `PlotlyPlot` as *javascript*
 functions using the [`add_plotly_listener!`](@ref) function.
 
 Custom listeners to normal javascript events can instead be added to the
-`PlutoPlot` as *javascript* functions using the [`add_js_listener!`](@ref)
+`PlotlyPlot` as *javascript* functions using the [`add_js_listener!`](@ref)
 function.
 
 Multiple listeners can be associated to each event, and they are executed in the
 order they are added.
 
-A list of custom CSS classes can be added to the PlutoPlot by using the
+A list of custom CSS classes can be added to the PlotlyPlot by using the
 [`add_class!`](@ref) and [`remove_class!`](@ref) functions.
 
 Finally, the contents of the script tag generating the plot are stored in the
@@ -58,24 +58,27 @@ displayed plot can be customized by modifying the elements of this field.
 
 # Examples
 ```julia
-p = PlutoPlot(Plot(rand(10)))
+p = PlotlyPlot(Plot(rand(10)))
 add_plotly_listener!(p, "plotly_click", "e => console.log(e)")
 add_class!(p, "custom_class")
 ```
 
 See also: [`ScriptContents`](@ref), [`add_js_listener!`](@ref), [`add_plotly_listener!`](@ref)
 """
-Base.@kwdef struct PlutoPlot
+Base.@kwdef struct PlotlyPlot
 	Plot::PlotlyBase.Plot
 	plotly_listeners::Dict{String, Vector{JS}} = Dict{String, Vector{JS}}()
 	js_listeners::Dict{String, Vector{JS}} = Dict{String, Vector{JS}}()
 	classList::Vector{String} = String[]
 	script_contents::ScriptContents = ScriptContents(deepcopy(_default_script_contents))
 end
-PlutoPlot(p::PlotlyBase.Plot; kwargs...) = PlutoPlot(;kwargs..., Plot = p)
+PlotlyPlot(p::PlotlyBase.Plot; kwargs...) = PlotlyPlot(;kwargs..., Plot = p)
+
+# Name of the struct in PlutoPlotly 0.6
+const PlutoPlot = PlotlyPlot
 
 # Getter that extract the underlying Plot object data
-function Base.getproperty(p::PlutoPlot, s::Symbol)
+function Base.getproperty(p::PlotlyPlot, s::Symbol)
 	if hasfield(Plot, s)
 		getfield(getfield(p, :Plot), s)
 	else
@@ -85,12 +88,12 @@ end
 
 function plot(args...;kwargs...) 
 	@nospecialize
-	PlutoPlot(Plot(args...;kwargs...))
+	PlotlyPlot(Plot(args...;kwargs...))
 end
 
 # This function extracts the toImageButtonOptions as a Dict
 """
-	get_image_options(p::Union{Plot, PlutoPlot})::Dict{Symbol, Any}
+	get_image_options(p::Union{Plot, PlotlyPlot})::Dict{Symbol, Any}
 Extract the dictionary of image options that are stored in the
 `toImageButtonOptions` of the `PlotConfig` object embedded in the `Plot`.
 
@@ -98,13 +101,13 @@ If not explicitly set, the image options are empty by default when creating a Pl
 
 See also: [`change_image_options!`](@ref)
 """
-function get_image_options(p::Union{Plot, PlutoPlot}) 
+function get_image_options(p::Union{Plot, PlotlyPlot}) 
     dict = something(p.config.toImageButtonOptions, Dict())
     return Dict{Symbol, Any}((Symbol(k) => v) for (k, v) in dict)
 end
 
 """
-	change_image_options!(p::Union{Plot, PlutoPlot}; kwargs...)
+	change_image_options!(p::Union{Plot, PlotlyPlot}; kwargs...)
 
 Returns the input plot `p` after having modified the `toImageButtonOptions` of the
 `PlotConfig` object embedded in the plot. These options are passed to
@@ -126,7 +129,7 @@ more details.
 - `scale`: Set the scaling for the generated image, keeping the aspect ratio intact (increases the resolution).
 - `filename`: Sets the name of the exported file, the extension will be added automatically based on the chosen `format`.
 """
-function change_image_options!(p::Union{Plot, PlutoPlot}; kwargs...)
+function change_image_options!(p::Union{Plot, PlotlyPlot}; kwargs...)
     # valid_args = (:format, :width, :height, :scale, :setBackground, :imageDataOnly, :filename)
 	# At the moment setBackground and imageDataOnly are not supported.
     valid_args = (:format, :width, :height, :scale, :filename)

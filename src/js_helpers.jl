@@ -1,9 +1,9 @@
 ## add listeners ##
 """
-	add_js_listener!(p::PlutoPlot, event_name::String, listener::HypertextLiteral.JavaScript)
-	add_js_listener!(p::PlutoPlot, event_name::String, listener::String)
+	add_js_listener!(p::PlotlyPlot, event_name::String, listener::HypertextLiteral.JavaScript)
+	add_js_listener!(p::PlotlyPlot, event_name::String, listener::String)
 
-Add a custom *javascript* `listener` (to be provided as `String` or directly as `HypertextLiteral.JavaScript`) to the `PlutoPlot` object `p`, and associated to the javascript event specified by `event_name`.
+Add a custom *javascript* `listener` (to be provided as `String` or directly as `HypertextLiteral.JavaScript`) to the `PlotlyPlot` object `p`, and associated to the javascript event specified by `event_name`.
 
 The listeners are added to the HTML plot div after rendering. The div where the plot is inserted can be accessed using the variable named `PLOT` inside the listener code.
 
@@ -14,7 +14,7 @@ See also: [`add_plotly_listener!`](@ref), [`htl_js`](@ref)
 
 # Examples:
 ```julia
-p = PlutoPlot(Plot(rand(10), Layout(uirevision = 1)))
+p = PlotlyPlot(Plot(rand(10), Layout(uirevision = 1)))
 add_js_listener!(p, "mousedown", htl_js(\"\"\"
 function(e) {
 
@@ -24,23 +24,23 @@ console.log(PLOT) // logs the plot div inside the developer console when pressin
 \"\"\"
 ```
 """
-function add_js_listener!(p::PlutoPlot, event_name::String, listener::JS)
+function add_js_listener!(p::PlotlyPlot, event_name::String, listener::JS)
 	ldict = p.js_listeners
 	listeners_array = get!(ldict, event_name, JS[])
 	push!(listeners_array, listener)
 	return p
 end
-add_js_listener!(p::PlutoPlot, event_name, listener::String) = add_js_listener!(p, event_name, htl_js(listener))
+add_js_listener!(p::PlotlyPlot, event_name, listener::String) = add_js_listener!(p, event_name, htl_js(listener))
 
 ## add class ##
 """
-	add_class!(p::PlutoPlot, className::String)
+	add_class!(p::PlotlyPlot, className::String)
 
 Add a CSS class with name `className` to the list of custom classes that are added to the PLOT div when displayed inside Pluto. This can be used to give custom CSS styles to certain plots.
 
 See also: [`remove_class!`](@ref)
 """
-function add_class!(p::PlutoPlot, className::String)
+function add_class!(p::PlotlyPlot, className::String)
 	cl = p.classList
 	if className ∉ cl
 		push!(cl, className)
@@ -51,13 +51,13 @@ end
 ## remove class ##
 
 """
-	remove_class!(p::PlutoPlot, className::String)
+	remove_class!(p::PlotlyPlot, className::String)
 
 Remove a CSS class with name `className` (if present) from the list of custom classes that are added to the PLOT div when displayed inside Pluto. This can be used to give custom CSS styles to certain plots.
 
 See also: [`add_class!`](@ref)
 """
-function remove_class!(p::PlutoPlot, className::String)
+function remove_class!(p::PlotlyPlot, className::String)
 	cl = p.classList
 	idx = findfirst(x -> x === className, cl)
 	if idx !== nothing
@@ -68,11 +68,11 @@ end
 
 ## Push Script ##
 """
-	push_script!(p::PlutoPlot, items...)
+	push_script!(p::PlotlyPlot, items...)
 Add script contents contained in collection `items` at the end of the plot show method script.
 The `item` must either be a collection of `String` or `HypertextLiteral.JavaScript` elements
 """
-function push_script!(p::PlutoPlot, items::Vararg{JS,N}) where N
+function push_script!(p::PlotlyPlot, items::Vararg{JS,N}) where N
 	@nospecialize
 	push!(p.script_contents.vec, items...)
 	return p
@@ -80,10 +80,10 @@ end
 
 ## plotly listener ##
 """
-	add_plotly_listener!(p::PlutoPlot, event_name::String, listener::HypertextLiteral.JavaScript)
-	add_plotly_listener!(p::PlutoPlot, event_name::String, listener::String)
+	add_plotly_listener!(p::PlotlyPlot, event_name::String, listener::HypertextLiteral.JavaScript)
+	add_plotly_listener!(p::PlotlyPlot, event_name::String, listener::String)
 
-Add a custom *javascript* `listener` (to be provided as `String` or directly as `HypertextLiteral.JavaScript`) to the `PlutoPlot` object `p`, and associated to the [plotly event](https://plotly.com/javascript/plotlyjs-events/) specified by `event_name`.
+Add a custom *javascript* `listener` (to be provided as `String` or directly as `HypertextLiteral.JavaScript`) to the `PlotlyPlot` object `p`, and associated to the [plotly event](https://plotly.com/javascript/plotlyjs-events/) specified by `event_name`.
 
 The listeners are added to the HTML plot div after rendering. The div where the plot is inserted can be accessed using the variable named `PLOT` inside the listener code.
 
@@ -94,7 +94,7 @@ See also: [`add_js_listener!`](@ref), [`htl_js`](@ref)
 
 # Examples:
 ```julia
-p = PlutoPlot(Plot(rand(10), Layout(uirevision = 1)))
+p = PlotlyPlot(Plot(rand(10), Layout(uirevision = 1)))
 add_plotly_listener!(p, "plotly_relayout", htl_js(\"\"\"
 function(e) {
 
@@ -104,10 +104,10 @@ console.log(PLOT) // logs the plot div inside the developer console
 \"\"\"
 ```
 """
-function add_plotly_listener!(p::PlutoPlot, event_name::String, listener::JS)
+function add_plotly_listener!(p::PlotlyPlot, event_name::String, listener::JS)
 	ldict = p.plotly_listeners
 	listeners_array = get!(ldict, event_name, JS[])
 	push!(listeners_array, listener)
 	return p
 end
-add_plotly_listener!(p::PlutoPlot, event_name, listener::String) = add_plotly_listener!(p, event_name, htl_js(listener))
+add_plotly_listener!(p::PlotlyPlot, event_name, listener::String) = add_plotly_listener!(p, event_name, htl_js(listener))

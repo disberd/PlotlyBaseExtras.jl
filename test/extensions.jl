@@ -1,5 +1,5 @@
-using PlutoPlotly
-using PlutoPlotly: PLOTLY_VERSION
+using PlotlyBaseExtras
+using PlotlyBaseExtras: PLOTLY_VERSION
 using Test
 using ScopedValues
 
@@ -27,7 +27,7 @@ if Sys.islinux()
 end
 
 ## Unitful Extension ##
-using PlutoPlotly: _process_with_names
+using PlotlyBaseExtras: _process_with_names
 using Unitful: °, ustrip
 
 uv_r = range(0°, 100°; step = 1°)

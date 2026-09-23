@@ -21,7 +21,7 @@ get_local_path(v) = if VersionNumber(v) === ARTIFACT_VERSION
     joinpath(artifact"plotly-esm-min", "plotly-esm-min.mjs")
 else
     # We use the UUID explicitly to make this work with PlutoDevMacros even without rootmodule
-    scratchspace = get_scratch!(Base.UUID("8e989ff0-3d88-8e9f-f020-2b208a939ff0"), "plotly-library-esm")
+    scratchspace = get_scratch!(Base.UUID("ba01aadf-c838-43fc-827a-f1961e451c7b"), "plotly-library-esm")
     joinpath(scratchspace, "$(get_local_name(v)).mjs")
 end
 get_local_name(v) = "plotly-esm-min-$(VersionNumber(v))"

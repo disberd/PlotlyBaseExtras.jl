@@ -1,5 +1,5 @@
 @testitem "colorscale_utilities" begin
-    using PlutoPlotly.Colors
+    using PlotlyBaseExtras.Colors
     cs = sample_colorscheme(:viridis)
     @test length(cs) === 256
     @test cs.colors isa Vector{<:RGBA}

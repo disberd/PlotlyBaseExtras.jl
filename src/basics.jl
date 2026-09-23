@@ -8,7 +8,7 @@ const JS = HypertextLiteral.JavaScript
 	ScriptContents
 Wrapper around a vector of `HypertextLiteral.JavaScript` elements. It has a custom print implementation of `HypertextLiteral.print_script` in order to allow serialization of its various elements inside a script tag.
 
-It is used inside the PlutoPlot to allow modularity and ease customization of the script contents that is used to generate the plotlyjs plot in Javascript.
+It is used inside the PlotlyPlot to allow modularity and ease customization of the script contents that is used to generate the plotlyjs plot in Javascript.
 """
 struct ScriptContents
 	vec::Vector{JS}
@@ -22,7 +22,7 @@ end
 
 """
 	htl_js(x)
-Simple convenience constructor for `HypertextLiteral.JavaScript` objects, renamed and re-exported from HypertextLiteral for convenience in case HypertextLiteral is not explicitly loaded alongisde PlutoPlotly.
+Simple convenience constructor for `HypertextLiteral.JavaScript` objects, renamed and re-exported from HypertextLiteral for convenience in case HypertextLiteral is not explicitly loaded alongisde PlotlyBaseExtras.
 
 See also: [`add_plotly_listeners!`](@ref)
 """
@@ -162,7 +162,7 @@ end
 	default_plotly_template(template::Template)::Template
 	default_plotly_template(name::Union{Symbol, String})::Template
 Set `template` as the current default plotly template (**globally**) to be used by all plots
-from PlutoPlotly (unless specifically overridden with Layout).
+from PlotlyBaseExtras (unless specifically overridden with Layout).
 
 If called with a `Symbol` or `String`, uses `name` to extract the corresponding
 template the default ones available in PlotlyBase and sets it as default.
