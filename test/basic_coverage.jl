@@ -70,7 +70,7 @@ end
             @eval Main module PlutoRunner end
         end
         reference_published = AbstractPlutoDingetjes.Display.published_to_js(Dict("x" => 1))
-        published = PlotlyBaseExtras.maybe_publish_to_js(Dict("x" => 1))
+        published = PlotlyBaseExtras.to_js(PlotlyBaseExtras.PlutoHost(), Dict("x" => 1))
         @test typeof(published) === typeof(reference_published)
         called = Ref(false)
         io = IOContext(
@@ -88,4 +88,26 @@ end
             Base.delete_binding(Main, :PlutoRunner)
         end
     end
+end
+
+@testset "Host rendering" begin
+    p_plain = plot([123, 456])
+    push_script!(p_plain, htl_js("const user_script = true"))
+    rendered = sprint(PlotlyBaseExtras.render, PlotlyBaseExtras.PlainHTML(), p_plain)
+    @test occursin("123", rendered)
+    @test occursin("renderPlot(", rendered)
+    @test occursin("insertAdjacentElement", rendered)
+    @test occursin("document.currentScript", rendered)
+    @test occursin("https://esm.sh/plotly.js-dist-min@", rendered)
+    @test occursin(r"\}\)\(document\.currentScript\)\.catch\(console\.error\);\s*</script>\s*$", rendered)
+    @test !occursin("invalidation.then", rendered)
+
+    shown = repr(MIME"text/html"(), p_plain)
+    @test occursin("document.currentScript", shown)
+
+    adapter_position = findfirst("currentScript.insertAdjacentElement", rendered)
+    user_position = findfirst("const user_script = true", rendered)
+    @test !isnothing(adapter_position) &&
+        !isnothing(user_position) &&
+        first(user_position) > first(adapter_position)
 end

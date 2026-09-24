@@ -1,17 +1,19 @@
 // Self-contained ESLint flat config (no npm deps) for the plot-injection scripts.
 //
 // The core files (html.js, container.js, clipboard.js, resizer.js) plus the
-// active adapter (pluto_adapter.js) are read by Julia and concatenated into a
-// single <script> that the package injects into the page (see src/show.jl and
-// src/main_struct.jl). They share one lexical scope: per-plot state lives on the
-// CONTAINER element, and the files call each other's top-level functions.
+// adapters (pluto_adapter.js and plain_adapter.js) are read by Julia and
+// concatenated into a single <script> that the package injects into the page
+// (see src/show.jl and src/main_struct.jl). They share one lexical scope:
+// per-plot state lives on the CONTAINER element, and the files call each
+// other's top-level functions.
 //
 // Contract: an adapter calls `renderPlot` with `plot_obj`, `Plotly`, `css`,
 // `plotly_listeners`, `js_listeners` (published by the Julia preamble in
 // src/show.jl and the `css` binding in src/main_struct.jl), and mounts the
 // returned container. Only `pluto_adapter.js` uses Pluto's `invalidation` and
-// `this`. The names below are the cross-file and host contract. Declaring them
-// keeps `no-undef` useful.
+// `this`; both adapters use the injected `currentScript` when they need it.
+// The names below are the cross-file and host contract. Declaring them keeps
+// `no-undef` useful.
 
 const injectedGlobals = {
   // Published data + library (Julia preamble in src/show.jl)
@@ -25,6 +27,8 @@ const injectedGlobals = {
   html: "readonly",
   // Pluto runtime — only pluto_adapter.js touches `invalidation`
   invalidation: "readonly",
+  // Current script element, passed by the plain wrapper and injected by Pluto.
+  currentScript: "readonly",
   // Core entry point (container.js); the adapter calls it with the globals above
   renderPlot: "readonly",
   // Core cross-file functions (defined in one core file, called from another)

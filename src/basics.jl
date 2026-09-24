@@ -29,11 +29,6 @@ See also: [`add_plotly_listeners!`](@ref)
 htl_js(x) = HypertextLiteral.JavaScript(x)
 htl_js(x::HypertextLiteral.JavaScript) = x
 
-maybe_publish_to_js(x) = if is_inside_pluto()
-	AbstractPlutoDingetjes.Display.published_to_js(x)
-else
-	x
-end
 
 current_cell_id()::Base.UUID = if is_inside_pluto()
 	Main.PlutoRunner.currently_running_cell_id[]
