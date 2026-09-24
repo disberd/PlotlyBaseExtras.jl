@@ -24,11 +24,13 @@ Scratch = "6c6a2e73-6563-6170-7368-637461726353"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [weakdeps]
+PlotlyExtensionsHelper = "a7e57fc7-3548-4021-90c3-ac0e175068b1"
 PlotlyKaleido = "f2990250-8cf9-495f-b13a-cce12b45703c"
 SlateExtensionsBase = "bc31d39e-4442-48fa-b9ae-1bd99fed63f7"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [extensions]
+PlotlyExtensionsHelperExt = "PlotlyExtensionsHelper"
 PlotlyKaleidoExt = "PlotlyKaleido"
 SlateExtensionsBaseExt = "SlateExtensionsBase"
 UnitfulExt = "Unitful"
@@ -46,6 +48,7 @@ LaTeXStrings = "1"
 Markdown = "1.9"
 Pkg = "1.9"
 PlotlyBase = "0.8"
+PlotlyExtensionsHelper = "0.3"
 PlotlyKaleido = "2"
 PrecompileTools = "1.2.1"
 Preferences = "1"
