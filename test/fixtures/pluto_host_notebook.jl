@@ -28,8 +28,11 @@ using PlutoDevMacros
 end
 
 # ╔═╡ 85dead27-dc94-4c3b-9a9c-81ac747ec552
-p1 = plot(scatter(; x = [1, 2, 3], y = [2, 1, 3]), Layout(; title = "Plain"))
-add_js_listener!(p1, "click", "(e) => console.log('host test click')")
+p1 = let
+	p = plot(scatter(; x = [1, 2, 3], y = [2, 1, 3]), Layout(; title = "Plain"))
+	add_js_listener!(p, "click", "(e) => console.log('host test click')")
+	p
+end
 
 # ╔═╡ 3bf466e9-5508-4fed-b402-b74c816582af
 p2 = plot(scatter(; x = [1, 2, 3], y = [3, 1, 2]), Layout(; title = L"$\alpha^2$"))
