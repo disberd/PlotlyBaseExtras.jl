@@ -1,0 +1,72 @@
+<!--
+Copy of the page the julia-vscode extension builds for a plot with the
+"application/vnd.julia-vscode.plotpane+html" kind: wrapHtml() in
+src/interactive/plots.ts at tag v1.245.1, lines 460-474, plus the
+plotElementStyle block at lines 391-441. The payload goes in place of
+{{PAYLOAD}}. The extension appends html2canvas, panzoom, main_plot_webview.js
+and a random invalidator script after the payload (lines 208-216, 173-178);
+they load through webview.asWebviewUri, so this standalone copy leaves them
+out.
+-->
+<html lang="en" style="padding:0;margin:0;">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Julia Plots</title>
+            <style>
+            #plot-element {
+    max-height: 100vh;
+    max-width: 100vw;
+    display: block;
+    position: absolute;
+    image-rendering: auto;
+}
+
+img#plot-element.pixelated {
+    image-rendering: pixelated;
+}
+
+#plot-element.pan-zoom {
+    cursor: all-scroll !important;
+}
+
+#plot-element > svg {
+    height: 100%;
+    width: 100%;
+}
+
+#copy-plot-btn {
+    padding: 0.4em 0.6em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+    border: 0px;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    color: var(--vscode-button-foreground);
+    z-index: 1000;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 1));
+}
+
+#copy-plot-btn:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    filter: unset;
+}
+
+#copy-plot-btn-desc {
+    display: none;
+}
+
+#copy-plot-btn:hover > #copy-plot-btn-desc {
+    display: inline;
+}
+
+            </style>
+        </head>
+        <body style="padding:0;margin:0;">
+            {{PAYLOAD}}
+        </body>
+        </html>
