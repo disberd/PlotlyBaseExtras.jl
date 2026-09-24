@@ -4,3 +4,4 @@ test*.jl
 .DS_Store
 coverage/
 .claude-workspace/
+LocalPreferences.toml
