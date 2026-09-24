@@ -26,5 +26,7 @@ end
 @testitem "Browser helper" setup=[BrowserHelper] begin include("browser_helper_test.jl") end
 @testitem "Plain HTML host" setup=[BrowserHelper] begin include("plain_html_host.jl") end
 @testitem "VSCode host browser" setup=[BrowserHelper] begin include("vscode_host_browser.jl") end
+# Local-only: drives a running Pluto server in headless Chrome.
+@testitem "Pluto host browser" setup = [BrowserHelper] skip = (VERSION >= v"1.13" || get(ENV, "CI", "") == "true") begin include("pluto_host.jl") end
 
 @run_package_tests verbose=true
