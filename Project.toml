@@ -1,7 +1,7 @@
 name = "PlotlyBaseExtras"
 uuid = "ba01aadf-c838-43fc-827a-f1961e451c7b"
 authors = ["Alberto Mengali <disberd@gmail.com>"]
-version = "0.6.6"
+version = "0.1.0"
 
 [deps]
 AbstractPlutoDingetjes = "6e696c72-6542-2067-7265-42206c756150"
