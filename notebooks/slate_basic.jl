@@ -23,6 +23,11 @@ add_js_listener!(pb, "click", "(e) => console.log('slate_basic click B')")
 add_plotly_listener!(pb, "plotly_click", "(e) => console.log('slate_basic plotly_click B')")
 pb
 
+#%% code id=plot_math
+pm = plot(scatter(; x = [1, 2, 3], y = [1, 4, 9]), Layout(; title = L"$\alpha^2$"))
+add_plotly_listener!(pm, "plotly_click", "(e) => console.log('slate_basic plotly_click M')")
+pm
+
 # ╔═╡ Slate.config · per-notebook settings (Settings panel)
 #   docid = df4532db-81bf-448a-96be-7eb1b7af97d5
 # ╚═╡
