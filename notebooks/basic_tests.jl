@@ -165,7 +165,7 @@ let
 	
 }
 	"""))
-	PlotlyBaseExtras._show(p)
+	p
 end
 
 # ╔═╡ 1460ece1-7828-4e93-ac37-e979b874b492

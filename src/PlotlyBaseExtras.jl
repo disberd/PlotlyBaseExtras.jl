@@ -37,12 +37,15 @@ export make_subplots
 export enable_plutoplotly_offline
 # From utilities.jl
 export sample_colorscheme, discrete_colorscale
+public Host, PlainHTML, PlutoHost, current_host, render, to_js, plotly_import
+
 
 
 include("local_plotly_library.jl")
 
 include("basics.jl")
 include("main_struct.jl")
+include("hosts.jl")
 include("paste_receiver.jl")
 include("mathjax.jl")
 include("preprocess.jl")
@@ -67,8 +70,9 @@ include("utilities.jl")
     ]
     layout = Layout(;title = "lol")
     p = plot(data, layout)
-    _show(p)
-    plot(rand(10,4)) |> _show
+    io = IOBuffer()
+    render(io, PlainHTML(), p)
+    render(io, PlainHTML(), plot(rand(10,4)))
 end
 
 end

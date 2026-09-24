@@ -40,21 +40,6 @@ function maybe_add_plotly_local(v)
 end
 
 
-function src_type(type)
-    @assert type in ("hybrid", "esm", "local")
-    type
-end
-
-function get_plotly_import(v, force = "hybrid")
-    force = src_type(force)
-    if force == "hybrid"
-        _ImportedHybridJS(v)
-    elseif force == "esm"
-        _ImportedRemoteJS(get_plotly_esm_url(v))
-    elseif force == "local"
-        import_local_js(get_local_plotly_contents(v))
-    end
-end
 
 
 # Identify a remote JS ESM module to be imported when shown in a script. The `extract` argument, if non-empty, will be the name of the property of the remote module to extract
