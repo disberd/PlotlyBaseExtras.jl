@@ -3,4 +3,5 @@ test*.jl
 .vscode/
 .DS_Store
 coverage/
-.claude-workspace/LocalPreferences.toml
+.claude-workspace/
+LocalPreferences.toml
