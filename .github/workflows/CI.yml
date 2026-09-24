@@ -1,0 +1,49 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1.12'
+          - '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: ${{ matrix.version }}
+      - uses: julia-actions/cache@v3
+      # The notebook tests load the package with PlutoDevMacros `@fromparent`,
+      # which needs a manifest at the repo root. The repo does not track a
+      # manifest, so CI must create one before the tests run.
+      - name: Instantiate project at the repo root
+        run: julia --project -e 'using Pkg; Pkg.instantiate()'
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+      - name: Lint the JS in lib
+        run: npx --yes eslint@10 lib
