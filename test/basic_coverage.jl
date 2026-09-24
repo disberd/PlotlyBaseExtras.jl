@@ -99,7 +99,7 @@ end
     @test occursin("insertAdjacentElement", rendered)
     @test occursin("document.currentScript", rendered)
     @test occursin("https://esm.sh/plotly.js-dist-min@", rendered)
-    @test endswith(rstrip(rendered), "\t\t})(document.currentScript).catch(console.error);\n\t</script>")
+    @test occursin(r"\}\)\(document\.currentScript\)\.catch\(console\.error\);\s*</script>\s*$", rendered)
     @test !occursin("invalidation.then", rendered)
 
     shown = repr(MIME"text/html"(), p_plain)

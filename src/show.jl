@@ -7,8 +7,7 @@ end
 
 function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id(io))
 	script_contents = _host_script_contents(host, pp)
-	opening = host isa PlutoHost ? JS("") : JS("(async (currentScript) => {")
-	closing = host isa PlutoHost ? JS("return CONTAINER") : JS("})(document.currentScript).catch(console.error);")
+	opening, closing = script_wrap(host)
 	show(io, MIME"text/html"(), @htl """
 		<script id=$(script_id)>$(opening)
 			// We start by putting all the variable interpolation here at the beginning
