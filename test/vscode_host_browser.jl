@@ -30,15 +30,40 @@ else
         BH.wait_for(page, DRAWN; timeout = 60)
         @test BH.count_nodes(page, ".js-plotly-plot") == 1
         @test isempty(BH.console_errors(page))
-        # The pane sizes the plot to the viewport.
-        box = BH.evaluate(page, """
+        # The pane sizes the plot to the viewport, with no scrollbars.
+        plot_box() = BH.evaluate(page, """
             (() => {
                 const r = document.querySelector('.js-plotly-plot .main-svg').getBoundingClientRect();
-                return {w: r.width, h: r.height};
+                const d = document.documentElement;
+                // A scrollbar takes space from the client area.
+                return {w: r.width, h: r.height, vw: innerWidth, vh: innerHeight,
+                        scroll: d.clientWidth < innerWidth || d.clientHeight < innerHeight};
             })()
         """)
-        @test abs(box["w"] - BH.evaluate(page, "window.innerWidth")) <= 2
-        @test abs(box["h"] - BH.evaluate(page, "window.innerHeight")) <= 2
+        box = plot_box()
+        @test abs(box["w"] - box["vw"]) <= 2
+        @test abs(box["h"] - box["vh"]) <= 2
+        @test !box["scroll"]
+        # A smaller pane shrinks the plot to the new size.
+        BH.cdp_call(page, "Emulation.setDeviceMetricsOverride"; params = Dict(
+            "width" => 700, "height" => 450, "deviceScaleFactor" => 1, "mobile" => false))
+        BH.wait_for(page, """
+            (() => {
+                const r = document.querySelector('.js-plotly-plot .main-svg').getBoundingClientRect();
+                return Math.abs(r.width - 700) <= 2 && Math.abs(r.height - 450) <= 2;
+            })()
+        """; timeout = 20)
+        @test !plot_box()["scroll"]
+        # The extension appends a "Copy Plot" button after the payload; the
+        # plot page hides it.
+        @test BH.evaluate(page, """
+            (() => {
+                const b = document.createElement('button');
+                b.id = 'copy-plot-btn';
+                document.body.append(b);
+                return getComputedStyle(b).display;
+            })()
+        """) == "none"
         # Spy on console.log so the wait has a page-side condition; the spy
         # calls the real console, so console_messages still records the event.
         BH.evaluate(page, """
