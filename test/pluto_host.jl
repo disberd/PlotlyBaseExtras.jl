@@ -4,9 +4,15 @@ using Pluto: ServerSession, SessionActions, Configuration, WorkspaceManager
 using Sockets
 const BH = BrowserHelper
 
-# Pluto's frontend prints this error while the editor page connects before the
-# notebook registered on the websocket. It says nothing about the plots.
-PLUTO_NOISE = "Notebook does not exist. Not connecting."
+# Console errors that say nothing about the plots:
+# - Pluto's frontend prints the first one while the editor page connects before
+#   the notebook registered on the websocket.
+# - The `@frompackage` cell of the fixture adds a PlutoDevMacros script
+#   (`frompackage-text-replace`). Its `execute_cell_observer` reads the output of
+#   a cell that has no `pluto-output` yet and throws a TypeError, which Pluto
+#   prints as two errors.
+PLUTO_NOISE = ("Notebook does not exist. Not connecting.", "frompackage-text-replace", "execute_cell_observer")
+is_noise(error) = any(n -> occursin(n, error), PLUTO_NOISE)
 
 # A port that is free now, so Pluto binds it directly instead of falling back
 # to a random one.
@@ -62,7 +68,7 @@ else
             BH.wait_for(page, "document.querySelectorAll('.js-plotly-plot .main-svg').length >= 2"; timeout = 60)
             BH.wait_for(page, "document.querySelector('.gtitle-math-group svg') !== null"; timeout = 60)
 
-            errors = filter(!occursin(PLUTO_NOISE), BH.console_errors(page))
+            errors = filter(!is_noise, BH.console_errors(page))
             @test isempty(errors)
             @test BH.count_nodes(page, ".js-plotly-plot") == 2
             @test BH.has_visible_svg(page, ".gtitle-math-group")

@@ -53,7 +53,8 @@ function handle_message(page, msg)
     if method == "Runtime.exceptionThrown"
         push_error(page, get(params, "text", "exception"))
     elseif method == "Runtime.consoleAPICalled"
-        text = join((stringify(get(a, "value", nothing)) for a in get(params, "args", [])), " ")
+        # An object argument (an Error, a DOM node) has no `value`, only a `description`.
+        text = join((stringify(get(a, "value", get(a, "description", nothing))) for a in get(params, "args", [])), " ")
         lock(page.lock) do
             push!(page.messages, text)
         end
