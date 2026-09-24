@@ -33,7 +33,9 @@ jobs:
       - uses: julia-actions/cache@v3
       # The notebook tests load the package with PlutoDevMacros `@fromparent`,
       # which needs a manifest at the repo root. The repo does not track a
-      # manifest, so CI must create one before the tests run.
+      # manifest, so CI must create one before the tests run. The root and
+      # `test` projects form one workspace, so this manifest also has the test
+      # dependencies.
       - name: Instantiate project at the repo root
         run: julia --project -e 'using Pkg; Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@v1

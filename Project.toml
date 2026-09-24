@@ -59,3 +59,6 @@ SlateExtensionsBase = "0.10"
 TOML = "1"
 Unitful = "1"
 julia = "1.12"
+
+[workspace]
+projects = ["test"]
