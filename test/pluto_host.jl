@@ -65,7 +65,7 @@ else
             errors = filter(!occursin(PLUTO_NOISE), BH.console_errors(page))
             @test isempty(errors)
             @test BH.count_nodes(page, ".js-plotly-plot") == 2
-            @test BH.has_svg(page, ".gtitle-math-group")
+            @test BH.has_visible_svg(page, ".gtitle-math-group")
 
             # A real mouse click on a point of the first plot fires the custom listener.
             BH.click(page, ".js-plotly-plot .point")

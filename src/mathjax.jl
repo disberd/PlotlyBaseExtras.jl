@@ -12,9 +12,11 @@ to be locally cached and `false` otherwise.
 The flag can be set at package level by providing the intended boolean value as
 argument to the function
 
-Local svg caching is used to make mathjax in recent plolty versions (>2.10) work
-as expected. The default `global` caching in Pluto creates problems with the
-math display.
+With the `global` font cache of MathJax, the math in a plot refers to glyphs
+that are not in the page, so it is invisible. When the page provides MathJax
+(`mathjax_source` `:hosted`, the default in Pluto), the plot always changes the
+cache to `local`. Set this flag to also change it for a MathJax that the page
+loaded before the plot, with any other source.
 
 `force_pluto_mathjax_local` is the PlutoPlotly 0.6 name of this function.
 """

@@ -105,8 +105,10 @@ change_plotly_source(:inline)
 plotly_source = "inline"
 ```
 
-`force_mathjax_local(true)` sets `svg.fontCache` to `"local"` in the MathJax config. Use it when
-a page loads MathJax with the default `global` font cache and the math does not display.
+`force_mathjax_local(true)` sets `svg.fontCache` to `"local"` in the MathJax config. With the
+`global` font cache, the math in a plot does not display. When the page provides MathJax
+(`mathjax_source` `:hosted`, the default in Pluto), the plot always makes this change. Use the flag
+when a page loaded MathJax before the plot, with any other source.
 
 ### plotly.js sources per host
 
