@@ -23,3 +23,10 @@ with(plotly_version => "2.33") do
 end
 
 @test showable(SlateExtensionsBase.SlateHtmlMIME(), p)
+
+# A `$` label loads MathJax from cdn on Slate, which provides no MathJax asset.
+let p_math = plot([1, 2, 3], Layout(title = L"$x^2$"))
+    html_math = slate_render(p_math).html
+    @test occursin("__plotlyBaseExtrasMathJax", html_math)
+    @test occursin("https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js", html_math)
+end

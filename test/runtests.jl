@@ -20,6 +20,7 @@ end
 @testitem "VSCode Host" begin include("vscode_host.jl") end
 @testitem "PlotlyBase API" begin include("plotlybase_api.jl") end
 @testitem "Loading modes" begin include("loading_modes.jl") end
+@testitem "MathJax loading" begin include("mathjax_loading.jl") end
 # Pluto does not run on Julia 1.13 yet.
 @testitem "Pluto Tests" skip = VERSION >= v"1.13" begin include("notebook_tests.jl") end
 @testitem "Browser helper" setup=[BrowserHelper] begin include("browser_helper_test.jl") end

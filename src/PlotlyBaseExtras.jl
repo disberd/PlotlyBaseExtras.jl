@@ -31,6 +31,8 @@ end
 re_export(PlotlyBase; skip_modname = false)
 export PlotlyPlot, PlutoPlot, get_plotly_version, change_plotly_version,
 get_plotly_source, change_plotly_source,
+get_mathjax, change_mathjax, get_mathjax_version, change_mathjax_version,
+get_mathjax_source, change_mathjax_source,
 force_mathjax_local, force_pluto_mathjax_local, htl_js, add_plotly_listener!,
 add_class!, remove_class!, add_js_listener!, default_plotly_template,
 get_image_options, change_image_options!, plutoplotly_paste_receiver
@@ -42,8 +44,8 @@ export sample_colorscheme, discrete_colorscale
 # Package UUID. The notebooks load this package through PlutoDevMacros, where the module has no package id, so preferences are read by UUID.
 const PLOTLY_UUID = Base.UUID("ba01aadf-c838-43fc-827a-f1961e451c7b")
 public Host, PlainHTML, PlutoHost, VSCodeHost, current_host, render, to_js, plotly_import,
-supported_sources, auto_source, plotly_source, plotly_version
-
+supported_sources, auto_source, plotly_source, plotly_version,
+mathjax, mathjax_version, mathjax_source
 
 
 include("local_plotly_library.jl")

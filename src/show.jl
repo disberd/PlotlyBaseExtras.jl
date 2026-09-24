@@ -6,6 +6,7 @@ function _host_script_contents(host::Host, pp::PlotlyPlot)
 end
 
 function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id(io))
+	processed = _process_with_names(pp)
 	script_contents = _host_script_contents(host, pp)
 	opening, closing = script_wrap(host)
 	show(io, MIME"text/html"(), @htl """
@@ -23,7 +24,7 @@ function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id
 			}
 
 			// Publish the plot object to JS
-			let plot_obj = $(to_js(host, _process_with_names(pp)))
+			let plot_obj = $(to_js(host, processed))
 			plot_obj.layout = removeTypedArray(plot_obj.layout)
 			// Get the plotly listeners
 			const plotly_listeners = $(pp.plotly_listeners)
@@ -34,7 +35,7 @@ function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id
 
 
 			// Load the plotly library
-			const Plotly = $(plotly_import(host, get_plotly_version()))
+			const Plotly = $(plotly_import(host, get_plotly_version()))$(mathjax_loader(host, processed))
 
 			// Check if we have to force local mathjax font cache
 			if ($(force_mathjax_local()) && window?.MathJax?.config?.svg?.fontCache === 'global') {
