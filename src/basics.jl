@@ -1,6 +1,8 @@
 const ARTIFACT_VERSION = VersionNumber(read(joinpath(artifact"plotly-esm-min", "VERSION"), String))
-const DEFAULT_PLOTLY_VERSION = Ref(ARTIFACT_VERSION)
-const PLOTLY_VERSION = ScopedValue{Union{Nothing, String, VersionNumber}}(nothing)
+const plotly_version = ScopedValue{Union{Nothing, String, VersionNumber}}(nothing)
+const plotly_source = ScopedValue{Union{Nothing, Symbol}}(nothing)
+const RUNTIME_PLOTLY_VERSION = Ref{Union{Nothing, String, VersionNumber}}(nothing)
+const RUNTIME_PLOTLY_SOURCE = Ref{Union{Nothing, Symbol}}(nothing)
 const DEFAULT_TEMPLATE = Ref(PlotlyBase.templates[PlotlyBase.templates.default])
 const JS = HypertextLiteral.JavaScript
 
@@ -45,16 +47,47 @@ function Base.show(io::IO, mime::MIME"text/html", s::JS)
 end
 
 
-## Plotly Version ##
-function change_plotly_version(v)
-	ver = VersionNumber(v)
-	maybe_add_plotly_local(ver)
-	DEFAULT_PLOTLY_VERSION[] = ver
+## Plotly Settings ##
+# Each setting resolves in order: ScopedValue, runtime setter, Preferences.toml, default.
+const SUPPORTED_SOURCES = (:auto, :cdn, :inline, :hosted)
+
+function _check_source(s::Symbol)
+	s in SUPPORTED_SOURCES || throw(ArgumentError("Invalid plotly source :$s, valid sources are $(join(SUPPORTED_SOURCES, ", "))"))
+	return s
 end
 
-function get_plotly_version() 
-    v = @something PLOTLY_VERSION[] DEFAULT_PLOTLY_VERSION[]
-    return VersionNumber(v)
+function change_plotly_version(v)
+	if v === nothing
+		RUNTIME_PLOTLY_VERSION[] = nothing
+		return nothing
+	end
+	ver = VersionNumber(v)
+	maybe_add_plotly_local(ver)
+	RUNTIME_PLOTLY_VERSION[] = ver
+	return ver
+end
+
+function change_plotly_source(s)
+	if s === nothing
+		RUNTIME_PLOTLY_SOURCE[] = nothing
+		return nothing
+	end
+	src = _check_source(s isa Symbol ? s : Symbol(s))
+	RUNTIME_PLOTLY_SOURCE[] = src
+	return src
+end
+
+# The getters read the Preferences.toml file at each call, so a preference
+# change applies without reloading the package.
+function get_plotly_version()::VersionNumber
+	v = @something plotly_version[] RUNTIME_PLOTLY_VERSION[] Preferences.load_preference(PLOTLY_UUID, "plotly_version") ARTIFACT_VERSION
+	return VersionNumber(v)
+end
+
+function get_plotly_source()::Symbol
+	s = @something plotly_source[] RUNTIME_PLOTLY_SOURCE[] Preferences.load_preference(PLOTLY_UUID, "plotly_source") :auto
+	s isa Symbol || (s = Symbol(s))
+	return _check_source(s)
 end
 
 ## Prepend Cell Selector ##
