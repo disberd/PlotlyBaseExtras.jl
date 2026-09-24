@@ -8,15 +8,17 @@ const pluto_adapter_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "pluto_
 const _default_script_contents = htl_js.([
 	# Provide our own `html` DOM helper, shadowing Pluto's injected one (see html.js)
 	html_script,
-	# Pluto-agnostic core: makeContainer/updatePlotData (container.js),
-	# addClipboardFunctionality (clipboard.js), addResizeFunctionality (resizer.js).
+	# Pluto-agnostic core: renderPlot, the entry point every adapter calls
+	# (container.js), addClipboardFunctionality (clipboard.js),
+	# addResizeFunctionality (resizer.js).
 	container_script,
 	clipboard_script,
 	resizer_script,
-	# The container stylesheet, bound to `css` for the adapter's makeContainer call.
+	# The container stylesheet, bound to `css` for the adapter's renderPlot call.
 	JS("const css = `" * _container_css * "`"),
-	# The only Pluto-aware piece: wires `this`/`invalidation`/published data into
-	# the core (see pluto_adapter.js). A vscode_adapter.js would replace just this.
+	# The only Pluto-aware piece: calls renderPlot with `this`/`invalidation`
+	# and the published data (see pluto_adapter.js). A vscode_adapter.js would
+	# replace just this.
 	pluto_adapter_script,
 ])
 
