@@ -48,6 +48,10 @@ function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id
 	""")
 end
 
+function Base.show(io::IO, ::MIME"application/vnd.julia-vscode.plotpane+html", p::PlotlyPlot)
+	render(io, VSCodeHost(), p)
+end
+
 function Base.show(io::IO, ::MIME"text/html", p::PlotlyPlot)
 	render(io, current_host(), p)
 end

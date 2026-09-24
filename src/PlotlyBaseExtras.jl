@@ -41,7 +41,7 @@ export enable_plutoplotly_offline
 export sample_colorscheme, discrete_colorscale
 # Package UUID. The notebooks load this package through PlutoDevMacros, where the module has no package id, so preferences are read by UUID.
 const PLOTLY_UUID = Base.UUID("ba01aadf-c838-43fc-827a-f1961e451c7b")
-public Host, PlainHTML, PlutoHost, current_host, render, to_js, plotly_import,
+public Host, PlainHTML, PlutoHost, VSCodeHost, current_host, render, to_js, plotly_import,
 supported_sources, auto_source, plotly_source, plotly_version
 
 
