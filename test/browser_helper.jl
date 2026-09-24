@@ -3,7 +3,6 @@
 using HTTP
 using HTTP.WebSockets
 using JSON
-using Sockets
 
 const CHROME_CANDIDATES = [
     "google-chrome",
