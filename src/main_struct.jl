@@ -5,6 +5,7 @@ const clipboard_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "clipboard.
 const resizer_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "resizer.js"), String))
 const pluto_adapter_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "pluto_adapter.js"), String))
 const plain_adapter_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "plain_adapter.js"), String))
+const vscode_adapter_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "vscode_adapter.js"), String))
 const ADAPTER_SLOT = htl_js("// host adapter")
 
 const _default_script_contents = htl_js.([

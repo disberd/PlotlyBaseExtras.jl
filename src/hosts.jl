@@ -1,6 +1,7 @@
 abstract type Host end
 struct PlainHTML <: Host end
 struct PlutoHost <: Host end
+struct VSCodeHost <: Host end
 
 current_host() = is_inside_pluto() ? PlutoHost() : PlainHTML()
 
@@ -32,6 +33,7 @@ plotly_import(::PlutoHost, ::Val{:hosted}, version) = _ImportedHybridJS(version)
 # The adapter JS and the code around the script body. The default mounts the
 # container beside the script tag in an async function, so `await import()` works.
 adapter_script(::Host) = plain_adapter_script
+adapter_script(::VSCodeHost) = vscode_adapter_script
 adapter_script(::PlutoHost) = pluto_adapter_script
 
 script_wrap(::Host) = (JS("(async (currentScript) => {"), JS("})(document.currentScript).catch(console.error);"))
