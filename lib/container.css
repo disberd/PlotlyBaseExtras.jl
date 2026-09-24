@@ -133,3 +133,10 @@ span.config-value {
 	color: var(--cm-tag-color);
 	font-weight: bold;
 }
+
+/* Copy acknowledgement: the modebar clipboard button turns green for ~1s. */
+.modebar-btn.plotlyplot-copied svg.icon path {
+	/* Plotly sets an inline fill on the icon path; override it while active. */
+	fill: green !important;
+	transition: fill 200ms;
+}

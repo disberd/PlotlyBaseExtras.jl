@@ -50,6 +50,7 @@ const browserGlobals = {
   alert: "readonly",
   fetch: "readonly",
   setTimeout: "readonly",
+  clearTimeout: "readonly",
   Promise: "readonly",
   Math: "readonly",
   Object: "readonly",
