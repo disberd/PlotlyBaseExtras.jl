@@ -25,7 +25,7 @@ The standard signature for a _process_with_names method is:
 where 
 - the first argument should be the actual input to process and should be
 typed accordingly for dispatch.
-- The second argument is either `Val{true}` or `Val{false}` and represents the
+- The second argument is either `Val{true}` or `Val{false}` and is the
 flag to force number to be converted in Float32. # We added this to
 significantly improve performance as the runtime check for converting or not was
 creating type instability.
@@ -36,9 +36,12 @@ call will have this form:
     _process_with_names(x, fl, AttrName(:xaxis), AttrName(:range), AttrName(:layout))
 
 This again is to allow dispatch to work on the path so that one can customize behavior of _process_with_names with great control.
-At the moment this is only used for modifying the behavior when `title` is
-passed as a String, changing it to the more recent plotly syntax (see
-https://github.com/JuliaPluto/PlutoPlotly.jl/issues/51)
+At the moment this is used for two plotly.js 2 names:
+- A `title` passed as a String becomes `Dict(:text => s)`, the plotly.js 3 syntax (see
+https://github.com/JuliaPluto/PlutoPlotly.jl/issues/51).
+- A trace `type` that the selected plotly.js version removed gives a one-time warning.
+Other names that plotly.js 3 and 4 removed are not converted, see
+`docs/adr/0001-drop-plotlyjs2-compat-except-string-title.md`.
 
 The various `@nospecialize` below are to avoid exploding compilation given our exponential number of dispatch options, so we only specialize where we need.
 =#
@@ -65,6 +68,8 @@ function _process_with_names(pp::PlotlyPlot)
         layout_template
     end
     out[:layout][:template] = _process_with_names(template, fl, AttrName(:template), AttrName(:layout))
+    # plotly.js 4 shows a button that sends the plot data to Plotly Cloud by default.
+    out[:config][:showSendToCloud] = false
     out
 end
 
@@ -77,6 +82,24 @@ _process_with_names(s::AbstractString, ::Val, @nospecialize(args::Vararg{AttrNam
     _preprocess(s)
 _process_with_names(s::AbstractString, ::Val, ::AttrName{:title}, @nospecialize(args::Vararg{AttrName})) =
     Dict(:text => _preprocess(s))
+
+# The plotly.js version that removed each trace type. plotly.js draws no data for these types.
+const REMOVED_TRACE_TYPES = Dict(
+    "heatmapgl" => v"3",
+    "pointcloud" => v"3",
+    "scattermapbox" => v"4",
+    "choroplethmapbox" => v"4",
+    "densitymapbox" => v"4",
+)
+# The path matches only the traces of the plot data. The PlotlyBase templates have entries
+# for `heatmapgl` and `scattermapbox`, and these entries must not warn.
+function _process_with_names(s::AbstractString, ::Val, ::AttrName{:type}, ::AttrName{:data})
+    removed_in = get(REMOVED_TRACE_TYPES, s, nothing)
+    if !isnothing(removed_in) && get_plotly_version() >= removed_in
+        @warn "plotly.js $removed_in removed the `$s` trace type, so the plot shows no data for this trace. The README lists the replacement." maxlog = 1 _id = Symbol(:removed_trace_, s)
+    end
+    _preprocess(s)
+end
 
 # Handle Reals
 _process_with_names(x::Real, ::Val{false}, @nospecialize(args::Vararg{AttrName})) = x
