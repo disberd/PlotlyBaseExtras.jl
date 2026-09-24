@@ -510,6 +510,24 @@ let
 	plot(contour(x=x, y=y, z=Z), Layout(width=650, height=350, template = "none"))
 end
 
+# ╔═╡ 05e5b8a4-01c3-4f80-aab3-b389287719e5
+md"""
+## Image options guard
+"""
+
+# ╔═╡ 62841827-98db-46b0-b1bd-c6ae5cf819de
+# Move the slider and check the clipboard header values after the re-render.
+@bind guard_img_opts Slider(1:2)
+
+# ╔═╡ acf847cd-b1b3-4606-9cc7-8f2ef1fd7bff
+let
+	p = PlotlyPlot(Plot(rand(10)))
+	if guard_img_opts == 2
+		change_image_options!(p; format = "svg", filename = "guard_check", height = 300)
+	end
+	p
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -905,5 +923,8 @@ version = "17.7.0+0"
 # ╟─5b5293bf-81b3-4e80-995a-f15f91971bd4
 # ╠═3612826c-0af0-4fef-aafe-112a2948f669
 # ╠═ce90eb60-98ed-4901-9218-ed8466bb03c7
+# ╟─05e5b8a4-01c3-4f80-aab3-b389287719e5
+# ╠═62841827-98db-46b0-b1bd-c6ae5cf819de
+# ╠═acf847cd-b1b3-4606-9cc7-8f2ef1fd7bff
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
