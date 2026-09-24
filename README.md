@@ -36,7 +36,7 @@ using PlotlyBaseExtras
 p = plot(scatter(x = 1:10, y = rand(10)), Layout(title = "A plot in a file"))
 
 open("plot.html", "w") do io
-    println(io, "<!doctype html><html><body>")
+    println(io, """<!doctype html><html><head><meta charset="utf-8"></head><body>""")
     PlotlyBaseExtras.render(io, PlotlyBaseExtras.PlainHTML(), p)
     println(io, "</body></html>")
 end

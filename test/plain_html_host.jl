@@ -1,6 +1,7 @@
 using Test
 using PlotlyBaseExtras
 using PlotlyBaseExtras: PlainHTML, render
+using ScopedValues
 const BH = BrowserHelper
 
 p1 = plot(scatter(; x = [1, 2, 3], y = [2, 1, 3]), Layout(; title = "Plain"))
@@ -66,6 +67,21 @@ else
         BH.wait_for(page, """
             !document.querySelector('.js-plotly-plot [data-title="Copy PNG to Clipboard"]').classList.contains('plotlyplot-copied')
         """; timeout = 3)
+        @test isempty(BH.console_errors(page))
+    end
+
+    # `:inline` embeds the plotly.js bundle in the page and imports it from a blob URL.
+    inline_html = sprint() do io
+        print(io, """<!doctype html><html><head><meta charset="utf-8"></head><body>""")
+        with(PlotlyBaseExtras.plotly_source => :inline) do
+            render(io, PlainHTML(), p1)
+        end
+        print(io, "</body></html>")
+    end
+    inline_path = joinpath(mktempdir(), "plain_html_inline.html")
+    write(inline_path, inline_html)
+    BH.with_file(inline_path) do page
+        BH.wait_for(page, "document.querySelector('.js-plotly-plot .main-svg') !== null"; timeout = 60)
         @test isempty(BH.console_errors(page))
     end
 end
