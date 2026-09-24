@@ -129,6 +129,55 @@ always loads it, and `:off` never loads it. The `mathjax_source` value `:auto` p
 Pluto, where the page provides MathJax, and `:cdn` in every other host. The loader skips loading
 when the page already defines `window.MathJax.version`.
 
+## plotly.js version
+
+The package bundles plotly.js 4.1.1. Set `plotly_version` to use a different version.
+
+### Names that plotly.js 3 and 4 removed
+
+plotly.js 3 and 4 ignore the removed names without a message. The package converts one of them:
+a String `title` at any path, for example `Layout(title = "A plot")`, becomes `title.text`. Change
+the other names in your code. The following table lists the removed names:
+
+| Removed name | Removed in | Use |
+|---|---|---|
+| `titlefont`, `titleside`, `titleposition`, `titleoffset` | 3.0 | `title.font`, `title.side`, `title.position`, `title.offset` |
+| `autotick` | 3.0 | `tickmode` |
+| annotation `ref` | 3.0 | `xref` and `yref` |
+| `bardir = "h"` | 3.0 | `orientation = "h"`, with `x` and `y` swapped |
+| `heatmapgl` trace | 3.0 | `heatmap` |
+| `pointcloud` trace | 3.0 | `scattergl` |
+| `scattermapbox`, `choroplethmapbox`, `densitymapbox` traces | 4.0 | `scattermap`, `choroplethmap`, `densitymap` |
+| `mapbox` subplot and `accesstoken` | 4.0 | `map` subplot, no token |
+
+plotly.js draws no data for a removed trace type. The package logs one warning when the plot data
+has a trace type that the selected `plotly_version` removed. The package does not convert the
+names in your JavaScript listener code, for example in a `Plotly.relayout` call.
+
+### Changed defaults in plotly.js 4
+
+plotly.js 4 changed these defaults, and the package keeps them:
+
+- An axis that overlays another axis uses `tickmode = "sync"`.
+- A `splom` trace sets `matches = true` on its axes.
+- A `geo` subplot uses `fitbounds = "locations"`.
+- plotly.js parses colors with the culori library.
+
+plotly.js 4 also shows a modebar button that sends the plot data to Plotly Cloud. The package sets
+`showSendToCloud = false` in the plot config, so the button does not show.
+
+### PlotlyKaleido export
+
+`savefig` from PlotlyKaleido exports the plot with the same `plotly_version` and `mathjax_version`
+as the other hosts. It restarts Kaleido when one of them changes. Kaleido 0.2.1 cannot export a
+`map` subplot with plotly.js 4. To export a map, use plotly.js 2.34:
+
+```julia
+with(PlotlyBaseExtras.plotly_version => "2.34") do
+    savefig(p, "map.png")
+end
+```
+
 ## PlutoPlotly
 
 PlutoPlotly 0.6 users need no change.
