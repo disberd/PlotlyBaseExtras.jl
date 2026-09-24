@@ -22,5 +22,6 @@ end
 @testitem "Loading modes" begin include("loading_modes.jl") end
 # Pluto does not run on Julia 1.13 yet.
 @testitem "Pluto Tests" skip = VERSION >= v"1.13" begin include("notebook_tests.jl") end
+@testitem "Browser helper" setup=[BrowserHelper] begin include("browser_helper_test.jl") end
 
 @run_package_tests verbose=true
