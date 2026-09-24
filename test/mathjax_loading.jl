@@ -26,7 +26,10 @@ end
     auto_math = sprint(io -> render(io, PlainHTML(), p_math))
     @test occursin(LOAD, auto_math)
     @test occursin(CDN_URL, auto_math)
-    @test occursin("await window.MathJax.startup.promise", auto_math)
+    # The wait step for a page MathJax stub runs before the version check
+    @test occursin("MathJax reports a version", auto_math)
+    @test first(findfirst("MathJax reports a version", auto_math)) <
+          first(findfirst("if (window.MathJax?.version) return;", auto_math))
     @test occursin("""svg: { fontCache: "local" }""", auto_math)
     # The shared promise and the existing-MathJax guard
     @test occursin("window.__plotlyBaseExtrasMathJax ??=", auto_math)
@@ -72,13 +75,20 @@ end
 end
 
 @testset "PlutoHost" begin
-    # The Pluto page already ships MathJax, so :auto is :hosted and emits no loader
-    @test !occursin(LOAD, render_pluto(p_math))
+    # :auto is :hosted: the core waits for Pluto's MathJax and loads no script
+    hosted_math = render_pluto(p_math)
+    @test occursin(LOAD, hosted_math)
+    @test occursin("MathJax reports a version", hosted_math)
+    @test !occursin("jsdelivr.net/npm/mathjax", hosted_math)
+
+    # Without a dollar the loader is absent, so the output stays unchanged
+    @test !occursin(LOAD, render_pluto(p_plain))
 
     cdn = with(mathjax_source => :cdn) do
         render_pluto(p_math)
     end
     @test occursin(CDN_URL, cdn)
+    @test occursin("MathJax reports a version", cdn)
 end
 
 @testset "unsupported source fallback" begin

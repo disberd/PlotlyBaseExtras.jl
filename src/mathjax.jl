@@ -111,7 +111,7 @@ mathjax_auto_source(::PlutoHost) = :hosted
 mathjax_auto_source(::Host) = :cdn
 
 # Resolve the MathJax source with the same table and fallback as plotly.js.
-# `:hosted` means the page provides MathJax, so the core emits no loader.
+# `:hosted` means the page provides MathJax, so the core waits for it.
 function mathjax_script(host::Host, version)
 	source = get_mathjax_source()
 	source = source === :auto ? mathjax_auto_source(host) : source
@@ -125,8 +125,9 @@ end
 # Only the v3 bundle path is known. The v4 path is one line when needed.
 mathjax_cdn_url(v) = "https://cdn.jsdelivr.net/npm/mathjax@$(VersionNumber(v))/es5/tex-svg.js"
 
-# `:hosted` means the page provides MathJax, so the core emits no loader.
-mathjax_script(::Host, ::Val{:hosted}, version) = _MathJaxLoader(:none, nothing)
+# `:hosted` means the page provides MathJax, so the core waits for it and
+# loads no script of its own.
+mathjax_script(::Host, ::Val{:hosted}, version) = _MathJaxLoader(:hosted, nothing)
 
 mathjax_script(::Host, ::Val{:cdn}, version) = _MathJaxLoader(:url, mathjax_cdn_url(version))
 
@@ -187,13 +188,30 @@ function Base.show(io::IO, ::MIME"text/javascript", l::_MathJaxLoader)
 		"""
 
 		// Load MathJax, so math labels render on the first draw. The page
-		// keeps one shared load promise, and an existing MathJax is trusted.
+		// keeps one shared load promise. A MathJax config stub comes first:
+		// the page script is still loading, so wait for it and never
+		// overwrite it with a loader of our own.
 		await (window.__plotlyBaseExtrasMathJax ??= (async () => {
-		if (window.MathJax?.version) return;
-		window.MathJax = { svg: { fontCache: "local" }, startup: { typeset: false } };
-		try {""")
+		try {
+		// Wait until the page MathJax reports a version, at most 5 s.
+		for (let i = 0; window.MathJax && !window.MathJax.version && i < 100; i++) {
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		}
+		await window.MathJax?.startup?.promise;
+		""")
+	if l.kind === :hosted
+		write(io, """
+		} catch (e) {
+		console.error("MathJax wait failed:", e);
+		}
+		})());
+		""")
+		return nothing
+	end
+	write(io, "if (window.MathJax?.version) return;\n")
 	if l.kind === :url
 		write(io, """
+		window.MathJax = { svg: { fontCache: "local" }, startup: { typeset: false } };
 		await new Promise((resolve, reject) => {
 		const s = document.createElement("script");
 		s.src = """)
@@ -208,7 +226,9 @@ function Base.show(io::IO, ::MIME"text/javascript", l::_MathJaxLoader)
 	else
 		# The bundle text is a JS string literal, escaped so it cannot close the
 		# surrounding script tag. An inline classic script runs on insertion.
-		write(io, """await new Promise((resolve) => {
+		write(io, """
+		window.MathJax = { svg: { fontCache: "local" }, startup: { typeset: false } };
+		await new Promise((resolve) => {
 		const s = document.createElement("script");
 		s.textContent = """)
 		_show_published(io, MIME"text/javascript"(), l.published)
