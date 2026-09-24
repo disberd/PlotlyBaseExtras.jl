@@ -1,11 +1,18 @@
-const _container_css = read(joinpath(@__DIR__, "..", "lib", "container.css"), String)
-const html_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "html.js"), String))
-const container_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "container.js"), String))
-const clipboard_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "clipboard.js"), String))
-const resizer_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "resizer.js"), String))
-const pluto_adapter_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "pluto_adapter.js"), String))
-const plain_adapter_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "plain_adapter.js"), String))
-const vscode_adapter_script = htl_js(read(joinpath(@__DIR__, "..", "lib", "vscode_adapter.js"), String))
+# The lib files become constants at precompile time, so they must be precompile
+# dependencies: a change to one of them must invalidate the cache.
+function _read_lib(name)
+	path = joinpath(@__DIR__, "..", "lib", name)
+	include_dependency(path; track_content = true)
+	return read(path, String)
+end
+const _container_css = _read_lib("container.css")
+const html_script = htl_js(_read_lib("html.js"))
+const container_script = htl_js(_read_lib("container.js"))
+const clipboard_script = htl_js(_read_lib("clipboard.js"))
+const resizer_script = htl_js(_read_lib("resizer.js"))
+const pluto_adapter_script = htl_js(_read_lib("pluto_adapter.js"))
+const plain_adapter_script = htl_js(_read_lib("plain_adapter.js"))
+const vscode_adapter_script = htl_js(_read_lib("vscode_adapter.js"))
 const ADAPTER_SLOT = htl_js("// host adapter")
 
 const _default_script_contents = htl_js.([

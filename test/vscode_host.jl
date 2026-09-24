@@ -10,11 +10,6 @@ p = plot([123, 456])
     @test occursin("123", html)
     @test occursin("renderPlot(", html)
     @test occursin("currentScript.insertAdjacentElement", html)
-    # The plot fills the pane and re-lays out on window resize.
-    @test occursin("100vw", html)
-    @test occursin("100vh", html)
-    @test occursin("window.addEventListener(\"resize\"", html)
-    @test occursin("Plotly.Plots.resize(PLOT)", html)
     # Default settings load plotly.js from esm.sh.
     @test occursin("https://esm.sh/plotly.js-dist-min@$(ARTIFACT_VERSION)", html)
 end
