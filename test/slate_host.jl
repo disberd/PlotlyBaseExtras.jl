@@ -1,7 +1,7 @@
 using Test
 using ScopedValues
 using PlotlyBaseExtras
-using PlotlyBaseExtras: PLOTLY_VERSION
+using PlotlyBaseExtras: plotly_version
 using SlateExtensionsBase
 using SlateExtensionsBase: slate_render, SlateHtml
 
@@ -16,7 +16,7 @@ html = rendered.html
 @test occursin("currentScript.insertAdjacentElement", html)
 @test occursin("/ext-assets/PlotlyBaseExtras/plotly-esm-min.mjs", html)
 
-with(PLOTLY_VERSION => "2.33") do
+with(plotly_version => "2.33") do
     html = slate_render(p).html
     @test occursin("https://esm.sh/plotly.js-dist-min@2.33.0", html)
     @test !occursin("/ext-assets/", html)

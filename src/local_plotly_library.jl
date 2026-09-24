@@ -78,7 +78,7 @@ function Base.show(io, m::MIME"text/javascript", i::_ImportedLocalJS)
         window.created_imports = window.created_imports ?? new Map();
         let code = """
     )
-    Base.show(io, m, i.published)
+    _show_published(io, m, i.published)
 
     write(io,
         """;
@@ -111,6 +111,11 @@ function Base.show(io, m::MIME"text/javascript", i::_ImportedLocalJS)
     end
     return nothing
 end
+
+_show_published(io::IO, m::MIME, published) = Base.show(io, m, published)
+# A plain String is a JS string literal. `print_script` escapes `</` as `<\/`,
+# so the literal cannot close the surrounding script tag.
+_show_published(io::IO, m::MIME, published::AbstractString) = HypertextLiteral.print_script(io, published)
 
 function import_local_js(code::AbstractString, extract::AbstractString = "")
 

@@ -1,6 +1,6 @@
 using Test
 using PlotlyBaseExtras
-using PlotlyBaseExtras: _preprocess, FORCE_FLOAT32, ARTIFACT_VERSION, PLOTLY_VERSION, _process_with_names
+using PlotlyBaseExtras: _preprocess, FORCE_FLOAT32, ARTIFACT_VERSION, plotly_version, _process_with_names
 using PlotlyBaseExtras.PlotlyBase: ColorScheme, Colors, Cycler, templates
 using PlotlyBaseExtras.AbstractPlutoDingetjes
 using ScopedValues
@@ -55,12 +55,12 @@ end
 try
     @test change_plotly_version("2.30") === VersionNumber("2.30.0")
     @test get_plotly_version() === VersionNumber("2.30.0")
-    @test VersionNumber("2.33.0") === with(PLOTLY_VERSION => "2.33") do 
+    @test VersionNumber("2.33.0") === with(plotly_version => "2.33") do 
         get_plotly_version()
     end 
 finally
-# We put back the default version to be the ARTIFACT one. This is to avoid errors while repeating multiple times tests locally
-    change_plotly_version(ARTIFACT_VERSION)
+    # Clear the runtime version, so later tests see the Preferences and default layers.
+    change_plotly_version(nothing)
 end
 
 @testset "Pluto 1.0 publish_to_js compatibility" begin
