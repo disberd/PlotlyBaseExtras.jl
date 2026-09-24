@@ -10,6 +10,12 @@ The listeners are added to the HTML plot div after rendering. The div where the 
 # Differences with `add_plotly_listener!`
 This function adds standard javascript events via the `addEventListener` function. These events differ from the plotly specific events.
 
+Inside the plot area, plotly.js puts a cover element over the page when a mouse button goes down.
+With a mouse or another pointer that can hover, the `dblclick` event then goes to `document.body`
+and not to `PLOT`, so a `"dblclick"` listener does not run there. It runs only in the areas
+outside the plotly drag areas, for example the title. To catch a double click in the plot area,
+use `add_plotly_listener!(p, "plotly_doubleclick", listener)`.
+
 See also: [`add_plotly_listener!`](@ref), [`htl_js`](@ref)
 
 # Examples:
