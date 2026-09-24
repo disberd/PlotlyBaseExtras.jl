@@ -60,7 +60,7 @@ else
         BH.wait_for(page, DRAWN; timeout = 60)
         BH.wait_for(page, "document.querySelector('.gtitle-math-group svg') !== null"; timeout = 60)
         @test BH.count_nodes(page, ".js-plotly-plot") == 1
-        @test BH.has_svg(page, ".gtitle-math-group")
+        @test BH.has_visible_svg(page, ".gtitle-math-group")
         @test isempty(BH.console_errors(page))
     end
 end

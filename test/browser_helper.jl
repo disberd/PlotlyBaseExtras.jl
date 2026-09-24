@@ -53,7 +53,8 @@ function handle_message(page, msg)
     if method == "Runtime.exceptionThrown"
         push_error(page, get(params, "text", "exception"))
     elseif method == "Runtime.consoleAPICalled"
-        text = join((stringify(get(a, "value", nothing)) for a in get(params, "args", [])), " ")
+        # An object argument (an Error, a DOM node) has no `value`, only a `description`.
+        text = join((stringify(get(a, "value", get(a, "description", nothing))) for a in get(params, "args", [])), " ")
         lock(page.lock) do
             push!(page.messages, text)
         end
@@ -457,13 +458,16 @@ function click(page, selector)
     return
 end
 
-"True when the first match is an `svg` or contains an `svg` element."
-function has_svg(page, selector)
+"True when the first match is or contains an `svg` element with a non-zero box."
+function has_visible_svg(page, selector)
     return evaluate(page, """
         (() => {
             const el = document.querySelector($(JSON.json(selector)));
             if (!el) return false;
-            return el.tagName.toLowerCase() === 'svg' || el.querySelector('svg') !== null;
+            const svg = el.tagName.toLowerCase() === 'svg' ? el : el.querySelector('svg');
+            if (!svg) return false;
+            const r = svg.getBoundingClientRect();
+            return r.width > 0 && r.height > 0;
         })()
     """) === true
 end

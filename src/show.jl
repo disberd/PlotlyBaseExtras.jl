@@ -8,6 +8,7 @@ end
 function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id(io))
 	processed = _process_with_names(pp)
 	script_contents = _host_script_contents(host, pp)
+	loader = mathjax_loader(host, processed)
 	opening, closing = script_wrap(host)
 	show(io, MIME"text/html"(), @htl """
 		<script id=$(script_id)>$(opening)
@@ -35,10 +36,12 @@ function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id
 
 
 			// Load the plotly library
-			const Plotly = $(plotly_import(host, get_plotly_version()))$(mathjax_loader(host, processed))
+			const Plotly = $(plotly_import(host, get_plotly_version()))$(loader)
 
-			// Check if we have to force local mathjax font cache
-			if ($(force_mathjax_local()) && window?.MathJax?.config?.svg?.fontCache === 'global') {
+			// With a global font cache, the math SVG that plotly.js inserts
+			// refers to glyph definitions that are not in the page, so the math
+			// is invisible. A page MathJax (Pluto) uses the global cache.
+			if ($(force_mathjax_local() || loader.kind === :hosted) && window?.MathJax?.config?.svg?.fontCache === 'global') {
 				window.MathJax.config.svg.fontCache = 'local'
 			}
 
