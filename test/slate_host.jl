@@ -5,8 +5,7 @@ using PlotlyBaseExtras: PLOTLY_VERSION
 using SlateExtensionsBase
 using SlateExtensionsBase: slate_render, SlateHtml
 
-slate_extension = Base.get_extension(PlotlyBaseExtras, :SlateExtensionsBaseExt)
-SlateHost = slate_extension.SlateHost
+@test !isnothing(Base.get_extension(PlotlyBaseExtras, :SlateExtensionsBaseExt))
 p = plot([123, 456])
 
 rendered = slate_render(p)

@@ -12,13 +12,17 @@ matching JavaScript and Plotly event message to the browser console.
 """
 
 #%% code id=plot_a
-p = plot(scatter(; x = [1, 2, 3], y = [2, 1, 3]), Layout(; title = "A"))
-add_js_listener!(p, "click", "(e) => console.log('slate_basic click A')")
-add_plotly_listener!(p, "plotly_click", "(e) => console.log('slate_basic plotly_click A')")
-p
+pa = plot(scatter(; x = [1, 2, 3], y = [3, 1, 2]), Layout(; title = "A"))
+add_js_listener!(pa, "click", "(e) => console.log('slate_basic click A')")
+add_plotly_listener!(pa, "plotly_click", "(e) => console.log('slate_basic plotly_click A')")
+pa
 
 #%% code id=plot_b
-p = plot(bar(; x = ["a", "b", "c"], y = [3, 1, 2]), Layout(; title = "B"))
-add_js_listener!(p, "click", "(e) => console.log('slate_basic click B')")
-add_plotly_listener!(p, "plotly_click", "(e) => console.log('slate_basic plotly_click B')")
-p
+pb = plot(bar(; x = ["a", "b", "c"], y = [3, 1, 2]), Layout(; title = "B"))
+add_js_listener!(pb, "click", "(e) => console.log('slate_basic click B')")
+add_plotly_listener!(pb, "plotly_click", "(e) => console.log('slate_basic plotly_click B')")
+pb
+
+# ╔═╡ Slate.config · per-notebook settings (Settings panel)
+#   docid = df4532db-81bf-448a-96be-7eb1b7af97d5
+# ╚═╡
