@@ -80,28 +80,18 @@ function Base.show(io, m::MIME"text/javascript", i::_ImportedLocalJS)
     )
     _show_published(io, m, i.published)
 
+    # The module loads from a blob URL. Do not use a data URL: Chrome needs about 10 GB of memory
+    # to import the plotly.js bundle (5 MB) from a data URL, and about 200 MB from a blob URL.
     write(io,
         """;
         if(created_imports.has(code)){
             return created_imports.get(code);
         } else {
-            let blob_promise = new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = async () => {
-                    try {
-                        resolve(await import(reader.result));
-                    } catch(e) {
-                        reject();
-                    }
-                }
-                reader.onerror = () => reject();
-                reader.onabort = () => reject();
-                reader.readAsDataURL(
-                    new Blob([code], {type : "text/javascript"}))
-                });
-                created_imports.set(code, blob_promise);
-                return blob_promise;
-            }
+            const url = URL.createObjectURL(new Blob([code], {type : "text/javascript"}));
+            const module_promise = import(url).finally(() => URL.revokeObjectURL(url));
+            created_imports.set(code, module_promise);
+            return module_promise;
+        }
         })())
         """
     )
