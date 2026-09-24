@@ -25,5 +25,6 @@ end
 @testitem "Pluto Tests" skip = VERSION >= v"1.13" begin include("notebook_tests.jl") end
 @testitem "Browser helper" setup=[BrowserHelper] begin include("browser_helper_test.jl") end
 @testitem "Plain HTML host" setup=[BrowserHelper] begin include("plain_html_host.jl") end
+@testitem "VSCode host browser" setup=[BrowserHelper] begin include("vscode_host_browser.jl") end
 
 @run_package_tests verbose=true
