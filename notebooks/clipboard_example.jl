@@ -17,7 +17,6 @@ end
 # ╔═╡ fe091a2b-a7cc-45a8-811b-efda254d0932
 @fromparent begin
 	import ^: *
-	using >.HypertextLiteral
 end
 
 # ╔═╡ e14f2689-36bc-48bb-818c-500805c18523

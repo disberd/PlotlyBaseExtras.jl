@@ -1,9 +1,9 @@
 ## add listeners ##
 """
-	add_js_listener!(p::PlotlyPlot, event_name::String, listener::HypertextLiteral.JavaScript)
-	add_js_listener!(p::PlotlyPlot, event_name::String, listener::String)
+	add_js_listener!(p::PlotlyPlot, event_name::String, listener::AbstractString)
 
-Add a custom *javascript* `listener` (to be provided as `String` or directly as `HypertextLiteral.JavaScript`) to the `PlotlyPlot` object `p`, and associated to the javascript event specified by `event_name`.
+Add a custom *javascript* `listener` (the code of a JS function, as a string) to the `PlotlyPlot` object `p`, and associated to the javascript event specified by `event_name`.
+If the code contains `</script` (in any case) or `<!--`, the function throws an `ArgumentError`.
 
 The listeners are added to the HTML plot div after rendering. The div where the plot is inserted can be accessed using the variable named `PLOT` inside the listener code.
 
@@ -16,27 +16,24 @@ and not to `PLOT`, so a `"dblclick"` listener does not run there. It runs only i
 outside the plotly drag areas, for example the title. To catch a double click in the plot area,
 use `add_plotly_listener!(p, "plotly_doubleclick", listener)`.
 
-See also: [`add_plotly_listener!`](@ref), [`htl_js`](@ref)
+See also: [`add_plotly_listener!`](@ref)
 
 # Examples:
 ```julia
 p = PlotlyPlot(Plot(rand(10), Layout(uirevision = 1)))
-add_js_listener!(p, "mousedown", htl_js(\"\"\"
+add_js_listener!(p, "mousedown", \"\"\"
 function(e) {
 
 console.log(PLOT) // logs the plot div inside the developer console when pressing down the mouse
 
 }
-\"\"\"
+\"\"\")
 ```
 """
-function add_js_listener!(p::PlotlyPlot, event_name::String, listener::JS)
-	ldict = p.js_listeners
-	listeners_array = get!(ldict, event_name, JS[])
-	push!(listeners_array, listener)
+function add_js_listener!(p::PlotlyPlot, event_name::String, listener::AbstractString)
+	push!(get!(p.js_listeners, event_name, String[]), _check_js(listener))
 	return p
 end
-add_js_listener!(p::PlotlyPlot, event_name, listener::String) = add_js_listener!(p, event_name, htl_js(listener))
 
 ## add class ##
 """
@@ -74,46 +71,43 @@ end
 
 ## Push Script ##
 """
-	push_script!(p::PlotlyPlot, items...)
-Add script contents contained in collection `items` at the end of the plot show method script.
-The `item` must either be a collection of `String` or `HypertextLiteral.JavaScript` elements
+	push_script!(p::PlotlyPlot, items::AbstractString...)
+Add the JS code in `items` at the end of the plot show method script.
+If the code contains `</script` (in any case) or `<!--`, the function throws an `ArgumentError`.
 """
-function push_script!(p::PlotlyPlot, items::Vararg{JS,N}) where N
+function push_script!(p::PlotlyPlot, items::AbstractString...)
 	@nospecialize
-	push!(p.script_contents.vec, items...)
+	push!(p.script_contents.vec, map(_check_js, items)...)
 	return p
 end
 
 ## plotly listener ##
 """
-	add_plotly_listener!(p::PlotlyPlot, event_name::String, listener::HypertextLiteral.JavaScript)
-	add_plotly_listener!(p::PlotlyPlot, event_name::String, listener::String)
+	add_plotly_listener!(p::PlotlyPlot, event_name::String, listener::AbstractString)
 
-Add a custom *javascript* `listener` (to be provided as `String` or directly as `HypertextLiteral.JavaScript`) to the `PlotlyPlot` object `p`, and associated to the [plotly event](https://plotly.com/javascript/plotlyjs-events/) specified by `event_name`.
+Add a custom *javascript* `listener` (the code of a JS function, as a string) to the `PlotlyPlot` object `p`, and associated to the [plotly event](https://plotly.com/javascript/plotlyjs-events/) specified by `event_name`.
+If the code contains `</script` (in any case) or `<!--`, the function throws an `ArgumentError`.
 
 The listeners are added to the HTML plot div after rendering. The div where the plot is inserted can be accessed using the variable named `PLOT` inside the listener code.
 
 # Differences with `add_js_listener!`
 This function adds a listener using the plotly internal events via the `on` function. These events differ from the standard javascript ones and provide data specific to the plot.
 
-See also: [`add_js_listener!`](@ref), [`htl_js`](@ref)
+See also: [`add_js_listener!`](@ref)
 
 # Examples:
 ```julia
 p = PlotlyPlot(Plot(rand(10), Layout(uirevision = 1)))
-add_plotly_listener!(p, "plotly_relayout", htl_js(\"\"\"
+add_plotly_listener!(p, "plotly_relayout", \"\"\"
 function(e) {
 
 console.log(PLOT) // logs the plot div inside the developer console
 
 }
-\"\"\"
+\"\"\")
 ```
 """
-function add_plotly_listener!(p::PlotlyPlot, event_name::String, listener::JS)
-	ldict = p.plotly_listeners
-	listeners_array = get!(ldict, event_name, JS[])
-	push!(listeners_array, listener)
+function add_plotly_listener!(p::PlotlyPlot, event_name::String, listener::AbstractString)
+	push!(get!(p.plotly_listeners, event_name, String[]), _check_js(listener))
 	return p
 end
-add_plotly_listener!(p::PlotlyPlot, event_name, listener::String) = add_plotly_listener!(p, event_name, htl_js(listener))

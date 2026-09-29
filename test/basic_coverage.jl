@@ -49,7 +49,7 @@ let p = plot(rand(4))
     @test_throws "invalid keyword arguments" change_image_options!(p; heights = 400)
 end
 
-@test plutoplotly_paste_receiver() isa PlotlyBaseExtras.HypertextLiteral.Result
+@test plutoplotly_paste_receiver() isa HTML
 
 @test get_plotly_version() === ARTIFACT_VERSION
 try
@@ -92,7 +92,7 @@ end
 
 @testset "Host rendering" begin
     p_plain = plot([123, 456])
-    push_script!(p_plain, htl_js("const user_script = true"))
+    push_script!(p_plain, "const user_script = true")
     rendered = sprint(PlotlyBaseExtras.render, PlotlyBaseExtras.PlainHTML(), p_plain)
     @test occursin("123", rendered)
     @test occursin("renderPlot(", rendered)

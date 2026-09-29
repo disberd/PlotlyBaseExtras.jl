@@ -16,7 +16,7 @@ p_plain = plot([123, 456])
 # Rendering a PlutoHost outside Pluto needs Pluto's published_to_js io key,
 # the same setup as the "Host rendering" testset in basic_coverage.jl.
 function render_pluto(pp)
-    publisher(io, x) = PlotlyBaseExtras.HypertextLiteral.print_script(io, x)
+    publisher(io, x) = PlotlyBaseExtras.write_js(io, x)
     return sprint() do io
         render(IOContext(io, :pluto_published_to_js => publisher), PlutoHost(), pp)
     end

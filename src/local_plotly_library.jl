@@ -78,7 +78,7 @@ function Base.show(io, m::MIME"text/javascript", i::_ImportedLocalJS)
         window.created_imports = window.created_imports ?? new Map();
         let code = """
     )
-    _show_published(io, m, i.published)
+    write_js(io, i.published)
 
     # The module loads from a blob URL. Do not use a data URL: Chrome needs about 10 GB of memory
     # to import the plotly.js bundle (5 MB) from a data URL, and about 200 MB from a blob URL.
@@ -102,10 +102,30 @@ function Base.show(io, m::MIME"text/javascript", i::_ImportedLocalJS)
     return nothing
 end
 
-_show_published(io::IO, m::MIME, published) = Base.show(io, m, published)
-# A plain String is a JS string literal. `print_script` escapes `</` as `<\/`,
-# so the literal cannot close the surrounding script tag.
-_show_published(io::IO, m::MIME, published::AbstractString) = HypertextLiteral.print_script(io, published)
+# The one writer for the values of `to_js`, see its docstring for the contract.
+function write_js(io::IO, @nospecialize(x))
+    m = MIME"text/javascript"()
+    showable(m, x) ? show(io, m, x) : write_json(io, x)
+    return nothing
+end
+
+# In JSON text a `<` can only be in a string, where `\u003c` is the same character.
+function write_json(io::IO, x)
+    s = JSON.json(x; allownan = true)
+    n = ncodeunits(s)
+    from = 1  # The first byte not written yet.
+    i = findfirst('<', s)
+    GC.@preserve s while i !== nothing
+        if i < n && codeunit(s, i + 1) in (UInt8('/'), UInt8('!'), UInt8('s'), UInt8('S'))
+            unsafe_write(io, pointer(s, from), i - from)
+            write(io, "\\u003c")
+            from = i + 1
+        end
+        i = findnext('<', s, i + 1)
+    end
+    GC.@preserve s unsafe_write(io, pointer(s, from), n + 1 - from)
+    return nothing
+end
 
 function import_local_js(code::AbstractString, extract::AbstractString = "")
 
@@ -114,7 +134,7 @@ function import_local_js(code::AbstractString, extract::AbstractString = "")
         AbstractPlutoDingetjes.Display.published_to_js(code)
     catch e
         @warn "published_to_js did not work" exception=(e,catch_backtrace()) maxlog=1
-        repr(code)
+        code
     end
 
     _ImportedLocalJS(code_js, extract)
@@ -130,14 +150,14 @@ Put this in a separate cell so that the plotly JS library is stored in the brows
 function enable_plutoplotly_offline(;version = get_plotly_version())
     _import = import_local_js(get_local_plotly_contents(version), "default")
     v_str = string(VersionNumber(version))
-    @htl("""
-        <script>
-            const imports = {
-                $(v_str): $(_import)
-            }
-            window.plutoplotly_imports = imports
-        </script>
-    """)
+    # `HTML` with a function writes to the display `io`, which `published_to_js` needs.
+    HTML() do io
+        write(io, "<script>\nconst imports = {\n")
+        write_js(io, v_str)
+        write(io, ": ")
+        show(io, MIME"text/javascript"(), _import)
+        write(io, "\n}\nwindow.plutoplotly_imports = imports\n</script>\n")
+    end
 end
 
 struct _ImportedHybridJS

@@ -32,7 +32,7 @@ end
 @testitem "show a matrix with missing values" begin
     p = plot(heatmap(; z = [1.0 missing; 2.0 3.0]))
     shown = repr(MIME"text/html"(), p)
-    @test occursin("\"z\": [[1.0, 2.0], [null, 3.0]]", shown)
+    @test occursin(r"\"z\":\s*\[\[1\.0,\s*2\.0\],\s*\[null,\s*3\.0\]\]", shown)
 end
 
 @testitem "plotly.js 2 names" begin

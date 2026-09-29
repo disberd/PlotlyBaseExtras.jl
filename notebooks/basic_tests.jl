@@ -25,6 +25,8 @@ using PlutoDevMacros
 begin
 	using PlutoUI
 	using PlutoExtras
+	# `@htl` for the composition tests. PlotlyBaseExtras does not load HypertextLiteral.
+	using PlutoExtras.HypertextLiteral
 	using Dates
 	using Colors
 end
@@ -32,7 +34,6 @@ end
 # ╔═╡ 70dc8fa0-cc32-4ebe-af0d-62b5bb3a82ed
 @fromparent begin
 	using ^
-	using >.HypertextLiteral
 end
 
 # ╔═╡ 7bd46437-8af0-4a15-87e9-1508869e1600
@@ -146,7 +147,7 @@ pp = Plot(scatter3d(x = rand(N), y = rand(N), z = rand(N), mode="markers"), Layo
 # ╔═╡ ccf62e33-8fcf-45d9-83ed-c7de80800b76
 let
 	p = PlotlyPlot(pp)
-	add_plotly_listener!(p, "plotly_relayout", htl_js("""
+	add_plotly_listener!(p, "plotly_relayout", """
 	(e) => {
 
 	console.log(e)
@@ -164,7 +165,7 @@ let
    	console.log('plot_obj: ',plot_obj.layout.scene?.camera?.eye)
 	
 }
-	"""))
+	""")
 	p
 end
 
@@ -238,40 +239,40 @@ md"""
 # ╔═╡ c3b1a198-ef19-4a54-9c32-d9ea32a63812
 let
 	p = PlotlyPlot(Plot(rand(10), Layout(uirevision = 1)))
-	add_plotly_listener!(p, "plotly_relayout", htl_js("""
+	add_plotly_listener!(p, "plotly_relayout", """
 function(e) {
     
 	console.log('listener 1')
 	
 }
-	"""))
-	add_plotly_listener!(p, "plotly_relayout", htl_js("""
+	""")
+	add_plotly_listener!(p, "plotly_relayout", """
 function(e) {
     
 	console.log('listener 2')
 	
 }
-	"""))
+	""")
 	@htl "$p"
 end
 
 # ╔═╡ e9fc2030-c2f0-48e9-a807-424039e796b2
 let
 	p = PlotlyPlot(Plot(rand(10), Layout(uirevision = 1)))
-	add_plotly_listener!(p, "plotly_relayout", htl_js("""
+	add_plotly_listener!(p, "plotly_relayout", """
 function(e) {
     
 	console.log('listener 1')
 	
 }
-	"""))
-	add_plotly_listener!(p, "plotly_relayout", htl_js("""
+	""")
+	add_plotly_listener!(p, "plotly_relayout", """
 function(e) {
     
 	console.log('listener 2')
 	
 }
-	"""))
+	""")
 	p.plotly_listeners
 end
 
@@ -287,13 +288,13 @@ lololol = 1
 let
 	lololol
 	p = PlotlyPlot(Plot(rand(10), Layout(uirevision = 1)))
-	add_js_listener!(p, "mousedown", htl_js("""
+	add_js_listener!(p, "mousedown", """
 function(e) {
     
 	console.log('MOUSEDOWN!')
 	
 }
-	"""))
+	""")
 end
 
 # ╔═╡ 6128ff76-3f1f-4144-bb3d-f44678210013

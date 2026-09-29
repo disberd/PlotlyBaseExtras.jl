@@ -16,7 +16,6 @@ end
 # ╔═╡ acf6a6e2-9698-4aee-b8e5-1b47812370d0
 @fromparent begin
 	using ^
-	using >.HypertextLiteral
 	using >.ColorSchemes
 end
 

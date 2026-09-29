@@ -9,7 +9,7 @@ represented by a clipboard icon on the top-right of the screen. When clicked
 upon, the container div is expanded and it will contain the last image that has
 been sent to the clipboard from a PlotlyBaseExtras plot.
 """
-plutoplotly_paste_receiver(;popped = true) = @htl("""
+plutoplotly_paste_receiver(;popped = true) = HTML("""
 <script src="https://kit.fontawesome.com/087fc9ff41.js" crossorigin="anonymous"></script>
 <paste-receiver class="plotlyplot noimage minimized $(popped ? "popped" : "")">
   <div class="header">

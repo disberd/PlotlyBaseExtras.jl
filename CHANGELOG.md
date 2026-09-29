@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- BREAKING: Listeners and scripts are `String`s. `add_js_listener!`, `add_plotly_listener!`
+  and `push_script!` accept only an `AbstractString`. `p.js_listeners`, `p.plotly_listeners` and
+  `p.script_contents.vec` hold `String`s.
+- BREAKING: `add_js_listener!`, `add_plotly_listener!` and `push_script!` throw an
+  `ArgumentError` for JS code that contains `</script` (in any case) or `<!--`.
+- BREAKING: `plutoplotly_paste_receiver()` and `enable_plutoplotly_offline()` return
+  `Base.HTML`.
+- BREAKING: `nothing` in the plot data becomes `null` in the browser, as in Pluto. `NaN`,
+  `Inf` and `-Inf` stay `NaN`, `Infinity` and `-Infinity`.
+- BREAKING: The package needs JSON 1. It cannot share an environment with PlotlyJS 0.18.
+- The value that `to_js(host, x)` returns writes itself when it has a
+  `show(io, ::MIME"text/javascript", v)` method. The package writes every other value as JSON
+  text, with each `<` before `/`, `!`, `s` or `S` as `\u003c`.
+- `show` of a large plot is faster and uses less memory (plain HTML, Julia 1.13). A scatter with
+  10^6 points takes 210 ms and 97 MiB (407 ms and 359 MiB in 0.1). A 1000×1000 heatmap takes
+  112 ms (166 ms in 0.1).
+
+### Removed
+
+- BREAKING: `htl_js`. Give the JS code as a `String`.
+- BREAKING: The HypertextLiteral dependency and the binding
+  `PlotlyBaseExtras.HypertextLiteral`. To use `@htl`, load HypertextLiteral yourself.
+- BREAKING: `HypertextLiteral.JavaScript` values in `add_js_listener!`,
+  `add_plotly_listener!` and `push_script!`. They give a `MethodError`.
+
+### Fixed
+
+- The package no longer defines `show` for `HypertextLiteral.JavaScript` values. This method was
+  type piracy, and outside Pluto it threw a `MethodError`.
+
 ## [0.1.1] - 2026-09-29
 
 ### Changed

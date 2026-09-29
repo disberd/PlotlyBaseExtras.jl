@@ -217,7 +217,7 @@ function Base.show(io::IO, ::MIME"text/javascript", l::_MathJaxLoader)
 		await new Promise((resolve, reject) => {
 		const s = document.createElement("script");
 		s.src = """)
-		_show_published(io, MIME"text/javascript"(), l.published)
+		write_js(io, l.published)
 		write(io, raw"""
 		;
 		s.onload = resolve;
@@ -226,14 +226,14 @@ function Base.show(io::IO, ::MIME"text/javascript", l::_MathJaxLoader)
 		});
 		""")
 	else
-		# The bundle text is a JS string literal, escaped so it cannot close the
+		# The bundle text is a JSON string, escaped so it cannot close the
 		# surrounding script tag. An inline classic script runs on insertion.
 		write(io, """
 		window.MathJax = { svg: { fontCache: "local" }, startup: { typeset: false } };
 		await new Promise((resolve) => {
 		const s = document.createElement("script");
 		s.textContent = """)
-		_show_published(io, MIME"text/javascript"(), l.published)
+		write_js(io, l.published)
 		write(io, raw"""
 		;
 		document.head.appendChild(s);

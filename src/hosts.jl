@@ -5,6 +5,15 @@ struct VSCodeHost <: Host end
 
 current_host() = is_inside_pluto() ? PlutoHost() : PlainHTML()
 
+"""
+	to_js(host::Host, x)
+
+Return the value that `render` writes into the plot script for the data `x` (the plot data, and
+the `:inline` plotly.js and MathJax bundles). When the returned value has a
+`show(io, ::MIME"text/javascript", v)` method, it writes itself (for example the Pluto
+`published_to_js` object). `render` writes every other value as JSON text, with each `<` before
+`/`, `!`, `s` or `S` as `\\u003c`, so that the text cannot end or change the script element.
+"""
 to_js(::Host, x) = x
 to_js(::PlutoHost, x) = AbstractPlutoDingetjes.Display.published_to_js(x)
 
@@ -36,5 +45,5 @@ adapter_script(::Host) = plain_adapter_script
 adapter_script(::VSCodeHost) = vscode_adapter_script
 adapter_script(::PlutoHost) = pluto_adapter_script
 
-script_wrap(::Host) = (JS("(async (currentScript) => {"), JS("})(document.currentScript).catch(console.error);"))
-script_wrap(::PlutoHost) = (JS(""), JS("return CONTAINER"))
+script_wrap(::Host) = ("(async (currentScript) => {", "})(document.currentScript).catch(console.error);")
+script_wrap(::PlutoHost) = ("", "return CONTAINER")
