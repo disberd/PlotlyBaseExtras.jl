@@ -13,6 +13,9 @@ using Pkg
 Pkg.add("PlotlyBaseExtras")
 ```
 
+PlotlyBaseExtras 0.2 needs JSON 1, so it cannot share an environment with PlotlyJS 0.18:
+PlotlyJS 0.18.18 and WebIO 0.8.21 allow only JSON 0.21 or older.
+
 ## One example per host
 
 ### Pluto
