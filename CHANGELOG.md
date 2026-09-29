@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- In KaimonSlate, a re-run updates the plot in place, and a discarded plot releases its WebGL
-  contexts. This needs a Slate with `data-slate-keep` support (KaimonSlate PR #45).
+- In KaimonSlate, a re-run updates the plot in place and does not leak WebGL contexts. A plot
+  that Slate discards, or the plot of a deleted cell, releases its WebGL contexts.
 - A re-run no longer redraws the whole figure because of the custom modebar buttons (Pluto and
   Slate).
 

@@ -7,7 +7,8 @@
 - **Adapter**: the small piece per host, one Julia entry point and one JS file, that connects
   the host to the core. An entry point is whatever the host calls to display a value: a show
   method for a MIME, or a host render hook.
-- **Container**: the DOM element that holds one plot and its per-plot state. A host that can
-  re-render hands the old container back so zoom and size survive.
+- **Container**: the DOM element that holds one plot and its per-plot state. When a host shows a
+  plot again, the adapter uses the old container again, so zoom and size survive. The host can
+  give it back, or the adapter can find it itself.
 - **Data channel**: the way a host moves the plot data from Julia to the page. Examples: text in
   the HTML, a Pluto published object. _Avoid_: carrier.
