@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-29
+
 ### Changed
 
 - The first plot and the first render are faster: −2.2 s in a script and −2.9 s in Pluto.
@@ -34,5 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings for the plotly.js source (`:auto`, `:cdn`, `:inline`, `:hosted`) and the plotly.js
   version.
 
-[unreleased]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/disberd/PlotlyBaseExtras.jl/releases/tag/v0.1.0
