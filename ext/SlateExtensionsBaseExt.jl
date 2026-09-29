@@ -9,6 +9,7 @@ struct SlateHost <: PlotlyBaseExtras.Host end
 PlotlyBaseExtras.supported_sources(::SlateHost) = (:cdn, :hosted)
 PlotlyBaseExtras.auto_source(::SlateHost, version) =
     VersionNumber(version) == PlotlyBaseExtras.ARTIFACT_VERSION ? :hosted : :cdn
+PlotlyBaseExtras.adapter_script(::SlateHost) = PlotlyBaseExtras.slate_adapter_script
 
 function PlotlyBaseExtras.plotly_import(::SlateHost, ::Val{:hosted}, version)
     if VersionNumber(version) != PlotlyBaseExtras.ARTIFACT_VERSION
@@ -22,8 +23,11 @@ function PlotlyBaseExtras.plotly_import(::SlateHost, ::Val{:hosted}, version)
     )
 end
 
-SlateExtensionsBase.slate_render(p::PlotlyBaseExtras.PlotlyPlot) =
-    html_fragment(sprint(io -> PlotlyBaseExtras.render(io, SlateHost(), p)))
+# The holder before the script is where the Slate adapter mounts the plot. Slate keeps an element
+# marked `data-slate-keep` across runs of the cell, so the plot updates in place.
+SlateExtensionsBase.slate_render(p::PlotlyBaseExtras.PlotlyPlot) = html_fragment(
+    "<div data-slate-keep=\"plotlybaseextras\"></div>" *
+    sprint(io -> PlotlyBaseExtras.render(io, SlateHost(), p)))
 
 function __init__()
     provide_assets!(
