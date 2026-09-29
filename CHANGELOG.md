@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- In KaimonSlate, a re-run updates the plot in place, and a discarded plot releases its WebGL
+  contexts. This needs a Slate with `data-slate-keep` support (KaimonSlate PR #45).
+- A re-run no longer redraws the whole figure because of the custom modebar buttons (Pluto and
+  Slate).
+
 ## [0.1.0] - 2026-09-24
 
 ### Added

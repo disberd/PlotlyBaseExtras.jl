@@ -13,6 +13,7 @@ const resizer_script = htl_js(_read_lib("resizer.js"))
 const pluto_adapter_script = htl_js(_read_lib("pluto_adapter.js"))
 const plain_adapter_script = htl_js(_read_lib("plain_adapter.js"))
 const vscode_adapter_script = htl_js(_read_lib("vscode_adapter.js"))
+const slate_adapter_script = htl_js(_read_lib("slate_adapter.js"))
 const ADAPTER_SLOT = htl_js("// host adapter")
 
 const _default_script_contents = htl_js.([

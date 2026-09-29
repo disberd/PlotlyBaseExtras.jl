@@ -1,7 +1,7 @@
 // Self-contained ESLint flat config (no npm deps) for the plot-injection scripts.
 //
 // The core files (html.js, container.js, clipboard.js, resizer.js) plus the
-// adapters (pluto_adapter.js and plain_adapter.js) are read by Julia and
+// adapters (pluto_adapter.js, plain_adapter.js and slate_adapter.js) are read by Julia and
 // concatenated into a single <script> that the package injects into the page
 // (see src/show.jl and src/main_struct.jl). They share one lexical scope:
 // per-plot state lives on the CONTAINER element, and the files call each
@@ -11,7 +11,7 @@
 // `plotly_listeners`, `js_listeners` (published by the Julia preamble in
 // src/show.jl and the `css` binding in src/main_struct.jl), and mounts the
 // returned container. Only `pluto_adapter.js` uses Pluto's `invalidation` and
-// `this`; both adapters use the injected `currentScript` when they need it.
+// `this`; the other adapters use the injected `currentScript` when they need it.
 // The names below are the cross-file and host contract. Declaring them keeps
 // `no-undef` useful.
 
@@ -29,8 +29,9 @@ const injectedGlobals = {
   invalidation: "readonly",
   // Current script element, passed by the plain wrapper and injected by Pluto.
   currentScript: "readonly",
-  // Core entry point (container.js); the adapter calls it with the globals above
+  // Core entry points (container.js); the adapter calls them with the globals above
   renderPlot: "readonly",
+  destroyContainer: "readonly",
   // Core cross-file functions (defined in one core file, called from another)
   addClipboardFunctionality: "readonly",
   addResizeFunctionality: "readonly",

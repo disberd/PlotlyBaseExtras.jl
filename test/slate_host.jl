@@ -13,7 +13,8 @@ rendered = slate_render(p)
 html = rendered.html
 @test occursin("123", html)
 @test occursin("renderPlot(", html)
-@test occursin("currentScript.insertAdjacentElement", html)
+# The plot mounts in a holder that Slate keeps across runs of the cell.
+@test startswith(html, "<div data-slate-keep=\"plotlybaseextras\"></div>")
 @test occursin("/ext-assets/PlotlyBaseExtras/plotly-esm-min.mjs", html)
 
 with(plotly_version => "2.33") do
