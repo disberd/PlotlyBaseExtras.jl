@@ -83,9 +83,6 @@ Base.@kwdef struct PlotlyPlot
 end
 PlotlyPlot(p::PlotlyBase.Plot; kwargs...) = PlotlyPlot(;kwargs..., Plot = p)
 
-# Name of the struct in PlutoPlotly 0.6
-const PlutoPlot = PlotlyPlot
-
 # Getter that extract the underlying Plot object data
 function Base.getproperty(p::PlotlyPlot, s::Symbol)
 	if hasfield(Plot, s)

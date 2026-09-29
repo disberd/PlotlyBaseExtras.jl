@@ -20,8 +20,6 @@ try
 finally
     force_mathjax_local(false)
 end
-@test PlutoPlot === PlotlyPlot
-@test force_pluto_mathjax_local === force_mathjax_local
 
 @test ColorScheme([Colors.RGB(0.0, 0.0, 0.0), Colors.RGB(1.0, 1.0, 1.0)],
 "custom", "twotone, black and white") |> _process_with_names == [(0.0, "rgb(0,0,0)"), (1.0, "rgb(255,255,255)")]
@@ -49,7 +47,7 @@ let p = plot(rand(4))
     @test_throws "invalid keyword arguments" change_image_options!(p; heights = 400)
 end
 
-@test plutoplotly_paste_receiver() isa HTML
+@test plotly_paste_receiver() isa HTML
 
 @test get_plotly_version() === ARTIFACT_VERSION
 try

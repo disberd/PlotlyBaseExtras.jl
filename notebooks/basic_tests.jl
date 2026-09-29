@@ -45,7 +45,7 @@ md"""
 """
 
 # ╔═╡ 51a36d49-1dad-4340-8671-a6a63eb367a2
-enable_plutoplotly_offline()
+enable_plotly_offline()
 
 # ╔═╡ c4e4400e-e063-4236-96e5-ca3a60313e37
 md"""

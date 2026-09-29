@@ -29,16 +29,16 @@ function re_export(m::Module; skip_modname = false)
 end
 
 re_export(PlotlyBase; skip_modname = false)
-export PlotlyPlot, PlutoPlot, get_plotly_version, change_plotly_version,
+export PlotlyPlot, get_plotly_version, change_plotly_version,
 get_plotly_source, change_plotly_source,
 get_mathjax, change_mathjax, get_mathjax_version, change_mathjax_version,
 get_mathjax_source, change_mathjax_source,
-force_mathjax_local, force_pluto_mathjax_local, add_plotly_listener!,
+force_mathjax_local, add_plotly_listener!,
 add_class!, remove_class!, add_js_listener!, default_plotly_template,
-get_image_options, change_image_options!, plutoplotly_paste_receiver
+get_image_options, change_image_options!, plotly_paste_receiver
 export plot, push_script!, prepend_cell_selector
 export make_subplots
-export enable_plutoplotly_offline
+export enable_plotly_offline
 # From utilities.jl
 export sample_colorscheme, discrete_colorscale
 # Package UUID. The notebooks load this package through PlutoDevMacros, where the module has no package id, so preferences are read by UUID.

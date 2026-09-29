@@ -17,13 +17,9 @@ that are not in the page, so it is invisible. When the page provides MathJax
 (`mathjax_source` `:hosted`, the default in Pluto), the plot always changes the
 cache to `local`. Set this flag to also change it for a MathJax that the page
 loaded before the plot, with any other source.
-
-`force_pluto_mathjax_local` is the PlutoPlotly 0.6 name of this function.
 """
 force_mathjax_local() = FORCE_MATHJAX_LOCAL[]
 force_mathjax_local(flag::Bool) = FORCE_MATHJAX_LOCAL[] = flag
-
-const force_pluto_mathjax_local = force_mathjax_local
 
 ## MathJax Settings ##
 # Each setting resolves in order: ScopedValue, runtime setter, Preferences.toml, default.
