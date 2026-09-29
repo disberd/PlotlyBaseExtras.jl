@@ -29,6 +29,12 @@
     @test length((AttrName(:x)...,)) == 1
 end
 
+@testitem "show a matrix with missing values" begin
+    p = plot(heatmap(; z = [1.0 missing; 2.0 3.0]))
+    shown = repr(MIME"text/html"(), p)
+    @test occursin("\"z\": [[1.0, 2.0], [null, 3.0]]", shown)
+end
+
 @testitem "plotly.js 2 names" begin
     using PlotlyBaseExtras: _process_with_names, PlotlyPlot, plotly_version
     using ScopedValues

@@ -3,6 +3,14 @@ const plotly_version = ScopedValue{Union{Nothing, String, VersionNumber}}(nothin
 const plotly_source = ScopedValue{Union{Nothing, Symbol}}(nothing)
 const RUNTIME_PLOTLY_VERSION = Ref{Union{Nothing, String, VersionNumber}}(nothing)
 const RUNTIME_PLOTLY_SOURCE = Ref{Union{Nothing, Symbol}}(nothing)
+# The first template load of the precompile process must run inside a workload:
+# the package image keeps the code of a runtime dispatch only when that code
+# compiles inside a workload.
+@compile_workload PlotlyBase.templates[PlotlyBase.templates.default]
+# All PlotlyBase templates, read from their JSON files at precompile time and
+# kept in the package image. `__init__` puts them in the template cache of
+# PlotlyBase, so that the first `Layout()` does not parse a JSON file.
+const PLOTLYBASE_TEMPLATES = Dict(name => PlotlyBase.templates[name] for name in PlotlyBase.templates.available)
 const DEFAULT_TEMPLATE = Ref(PlotlyBase.templates[PlotlyBase.templates.default])
 const JS = HypertextLiteral.JavaScript
 

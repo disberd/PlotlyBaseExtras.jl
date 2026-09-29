@@ -267,5 +267,5 @@ end
 _has_dollar(s::AbstractString) = occursin('$', s)
 _has_dollar(d::AbstractDict) = any(_has_dollar, values(d))
 _has_dollar(x::Union{Tuple,AbstractArray}) = any(_has_dollar, x)
-_has_dollar(::AbstractArray{<:Real}) = false
+_has_dollar(::AbstractArray{<:Union{Missing,Real}}) = false
 _has_dollar(x) = false

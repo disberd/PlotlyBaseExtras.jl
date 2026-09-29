@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The first plot and the first render are faster: −2.2 s in a script and −2.9 s in Pluto.
+  With `SlateExtensionsBase` loaded, the first Slate render is also faster.
+
 ### Fixed
 
 - In KaimonSlate, a re-run updates the plot in place and does not leak WebGL contexts. A plot
   that Slate discards, or the plot of a deleted cell, releases its WebGL contexts.
 - A re-run no longer redraws the whole figure because of the custom modebar buttons (Pluto and
   Slate).
+- `show` of a plot with a matrix that has `missing` values (for example
+  `heatmap(z = [1.0 missing; 2.0 3.0])`) no longer throws a `MethodError`.
 
 ## [0.1.0] - 2026-09-24
 
