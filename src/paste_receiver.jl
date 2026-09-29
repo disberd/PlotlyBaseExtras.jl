@@ -1,5 +1,5 @@
 """
-  plutoplotly_paste_receiver(;popped = true)
+  plotly_paste_receiver(;popped = true)
 Create a widget that when shown inside a Pluto output generates a container
 specifically made for extracting images of exported plots obtained with the
 clipboard button on the plotly modebar.
@@ -9,7 +9,7 @@ represented by a clipboard icon on the top-right of the screen. When clicked
 upon, the container div is expanded and it will contain the last image that has
 been sent to the clipboard from a PlotlyBaseExtras plot.
 """
-plutoplotly_paste_receiver(;popped = true) = HTML("""
+plotly_paste_receiver(;popped = true) = HTML("""
 <script src="https://kit.fontawesome.com/087fc9ff41.js" crossorigin="anonymous"></script>
 <paste-receiver class="plotlyplot noimage minimized $(popped ? "popped" : "")">
   <div class="header">

@@ -142,12 +142,12 @@ end
 
 
 """
-    enable_plutoplotly_offline(;version = get_plotly_version())
+    enable_plotly_offline(;version = get_plotly_version())
 Creates a script that loads the plotly library on the current browser session so that it is available even when not connected to internet.
 
 Put this in a separate cell so that the plotly JS library is stored in the browser and available for all plots.
 """
-function enable_plutoplotly_offline(;version = get_plotly_version())
+function enable_plotly_offline(;version = get_plotly_version())
     _import = import_local_js(get_local_plotly_contents(version), "default")
     v_str = string(VersionNumber(version))
     # `HTML` with a function writes to the display `io`, which `published_to_js` needs.

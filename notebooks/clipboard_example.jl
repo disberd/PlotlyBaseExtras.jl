@@ -56,7 +56,7 @@ md"""
 	It is also limited in Chrome (or Chromium/Edge) to either static html exports (so files), or connection to a Pluto running server either through **localhost** or **https**. \
 	This is a mild limitations as most of the use cases in chrome should fall within those conditions. See the [relevant docs](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard) for more details.\
 	\
-	The package also provides a convenience widget to grab the image from the clipboard icon even on browser that do not support directly writing to the clipboard. This widget can be created using the `plutoplotly_paste_receiver` function that is exported by this package. See the heading below for more informations.
+	The package also provides a convenience widget to grab the image from the clipboard icon even on browser that do not support directly writing to the clipboard. This widget can be created using the `plotly_paste_receiver` function that is exported by this package. See the heading below for more informations.
 """
 
 # ╔═╡ 24156eed-3d09-4206-8bf4-217720a4a458

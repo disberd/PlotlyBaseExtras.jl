@@ -14,8 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `p.script_contents.vec` hold `String`s.
 - BREAKING: `add_js_listener!`, `add_plotly_listener!` and `push_script!` throw an
   `ArgumentError` for JS code that contains `</script` (in any case) or `<!--`.
-- BREAKING: `plutoplotly_paste_receiver()` and `enable_plutoplotly_offline()` return
-  `Base.HTML`.
+- BREAKING: `plutoplotly_paste_receiver` is now `plotly_paste_receiver`.
+- BREAKING: `enable_plutoplotly_offline` is now `enable_plotly_offline`.
+- BREAKING: `plotly_paste_receiver()` and `enable_plotly_offline()` return `Base.HTML`.
 - BREAKING: `nothing` in the plot data becomes `null` in the browser, as in Pluto. `NaN`,
   `Inf` and `-Inf` stay `NaN`, `Infinity` and `-Infinity`.
 - BREAKING: The package needs JSON 1. It cannot share an environment with PlotlyJS 0.18.
@@ -33,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `PlotlyBaseExtras.HypertextLiteral`. To use `@htl`, load HypertextLiteral yourself.
 - BREAKING: `HypertextLiteral.JavaScript` values in `add_js_listener!`,
   `add_plotly_listener!` and `push_script!`. They give a `MethodError`.
+- BREAKING: `PlutoPlot`. Use `PlotlyPlot`.
+- BREAKING: `force_pluto_mathjax_local`. Use `force_mathjax_local`.
 
 ### Fixed
 
