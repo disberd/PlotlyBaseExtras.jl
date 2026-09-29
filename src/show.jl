@@ -1,9 +1,26 @@
 function _host_script_contents(host::Host, pp::PlotlyPlot)
 	ScriptContents([
-		el.content == ADAPTER_SLOT.content ? adapter_script(host) : el
+		el == ADAPTER_SLOT ? adapter_script(host) : el
 		for el in pp.script_contents.vec
 	])
 end
+
+# A JS object with an array of listener functions for each event: `{"event": [f1, f2]}`.
+function write_listeners(io::IO, listeners::AbstractDict)
+	write(io, '{')
+	for (i, (event, codes)) in enumerate(listeners)
+		i > 1 && write(io, ", ")
+		write_js(io, event)
+		write(io, ": [")
+		join(io, codes, ", ")
+		write(io, ']')
+	end
+	write(io, '}')
+	return nothing
+end
+
+# The characters that can end a single-quoted attribute value or start a tag.
+_escape_attribute(s) = replace(string(s), '&' => "&amp;", '\'' => "&#39;", '<' => "&lt;")
 
 # A plot renders directly into an `IOBuffer` (`repr`, `sprint`, VS Code) or an
 # `IOContext{IOBuffer}` (Pluto), the IO types that the hosts pass. Another IO type
@@ -23,46 +40,61 @@ function _render(io::Union{IOBuffer,IOContext{IOBuffer}}, host::Host, pp::Plotly
 	script_contents = _host_script_contents(host, pp)
 	loader = mathjax_loader(host, processed)
 	opening, closing = script_wrap(host)
-	show(io, MIME"text/html"(), @htl """
-		<script id=$(script_id)>$(opening)
-			// We start by putting all the variable interpolation here at the beginning
-			// We have to convert all typedarrays in the layout to normal arrays. See Issue #25
-			function removeTypedArray(o) {
-				if (ArrayBuffer.isView(o)) return Array.from(o)
-				if (o !== null && typeof o === 'object' && !Array.isArray(o)) {
-					const r = {}
-					for (const [k, v] of Object.entries(o)) r[k] = removeTypedArray(v)
-					return r
-				}
-				return o
+	js = MIME"text/javascript"()
+	write(io, "<script id='", _escape_attribute(script_id), "'>", opening, """
+
+		// We start by putting all the variable interpolation here at the beginning
+		// We have to convert all typedarrays in the layout to normal arrays. See Issue #25
+		function removeTypedArray(o) {
+			if (ArrayBuffer.isView(o)) return Array.from(o)
+			if (o !== null && typeof o === 'object' && !Array.isArray(o)) {
+				const r = {}
+				for (const [k, v] of Object.entries(o)) r[k] = removeTypedArray(v)
+				return r
 			}
+			return o
+		}
 
-			// Publish the plot object to JS
-			let plot_obj = $(to_js(host, processed))
-			plot_obj.layout = removeTypedArray(plot_obj.layout)
-			// Get the plotly listeners
-			const plotly_listeners = $(pp.plotly_listeners)
-			// Get the JS listeners
-			const js_listeners = $(pp.js_listeners)
-			// Deal with eventual custom classes
-			let custom_classlist = $(pp.classList)
+		// Publish the plot object to JS
+		let plot_obj = """)
+	write_js(io, to_js(host, processed))
+	write(io, """
+
+		plot_obj.layout = removeTypedArray(plot_obj.layout)
+		// Get the plotly listeners
+		const plotly_listeners = """)
+	write_listeners(io, pp.plotly_listeners)
+	write(io, """
+
+		// Get the JS listeners
+		const js_listeners = """)
+	write_listeners(io, pp.js_listeners)
+	write(io, """
+
+		// Deal with eventual custom classes
+		let custom_classlist = """)
+	write_js(io, pp.classList)
+	write(io, """
 
 
-			// Load the plotly library
-			const Plotly = $(plotly_import(host, get_plotly_version()))$(loader)
+		// Load the plotly library
+		const Plotly = """)
+	show(io, js, plotly_import(host, get_plotly_version()))
+	show(io, js, loader)
+	write(io, """
 
-			// With a global font cache, the math SVG that plotly.js inserts
-			// refers to glyph definitions that are not in the page, so the math
-			// is invisible. A page MathJax (Pluto) uses the global cache.
-			if ($(force_mathjax_local() || loader.kind === :hosted) && window?.MathJax?.config?.svg?.fontCache === 'global') {
-				window.MathJax.config.svg.fontCache = 'local'
-			}
 
-			$(script_contents)
+		// With a global font cache, the math SVG that plotly.js inserts
+		// refers to glyph definitions that are not in the page, so the math
+		// is invisible. A page MathJax (Pluto) uses the global cache.
+		if (""", string(force_mathjax_local() || loader.kind === :hosted), """ && window?.MathJax?.config?.svg?.fontCache === 'global') {
+			window.MathJax.config.svg.fontCache = 'local'
+		}
 
-			$(closing)
-		</script>
-	""")
+		""")
+	show(io, js, script_contents)
+	write(io, "\n", closing, "\n</script>\n")
+	return nothing
 end
 
 function Base.show(@nospecialize(io::IO), ::MIME"application/vnd.julia-vscode.plotpane+html", p::PlotlyPlot)

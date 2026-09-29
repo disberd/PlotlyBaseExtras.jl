@@ -16,7 +16,6 @@ end
 # ╔═╡ dd8ddf0a-9085-4c9d-821d-8e7ed78d33c3
 @fromparent begin
 	using ^
-	using >.HypertextLiteral
 end
 
 # ╔═╡ d1251ff9-5b35-406c-877f-28e559ac6b46

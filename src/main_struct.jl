@@ -6,17 +6,17 @@ function _read_lib(name)
 	return read(path, String)
 end
 const _container_css = _read_lib("container.css")
-const html_script = htl_js(_read_lib("html.js"))
-const container_script = htl_js(_read_lib("container.js"))
-const clipboard_script = htl_js(_read_lib("clipboard.js"))
-const resizer_script = htl_js(_read_lib("resizer.js"))
-const pluto_adapter_script = htl_js(_read_lib("pluto_adapter.js"))
-const plain_adapter_script = htl_js(_read_lib("plain_adapter.js"))
-const vscode_adapter_script = htl_js(_read_lib("vscode_adapter.js"))
-const slate_adapter_script = htl_js(_read_lib("slate_adapter.js"))
-const ADAPTER_SLOT = htl_js("// host adapter")
+const html_script = _read_lib("html.js")
+const container_script = _read_lib("container.js")
+const clipboard_script = _read_lib("clipboard.js")
+const resizer_script = _read_lib("resizer.js")
+const pluto_adapter_script = _read_lib("pluto_adapter.js")
+const plain_adapter_script = _read_lib("plain_adapter.js")
+const vscode_adapter_script = _read_lib("vscode_adapter.js")
+const slate_adapter_script = _read_lib("slate_adapter.js")
+const ADAPTER_SLOT = "// host adapter"
 
-const _default_script_contents = htl_js.([
+const _default_script_contents = [
 	# Provide our own `html` DOM helper, which shadows Pluto's injected helper.
 	html_script,
 	# Pluto-agnostic core: renderPlot, clipboard support, and resize support.
@@ -24,21 +24,21 @@ const _default_script_contents = htl_js.([
 	clipboard_script,
 	resizer_script,
 	# Bind the container stylesheet for the host adapter.
-	JS("const css = `" * _container_css * "`"),
+	"const css = `" * _container_css * "`",
 	# Render replaces this marker with the current host adapter.
 	ADAPTER_SLOT,
-])
+]
 
 """
 	PlotlyPlot(p::Plot; kwargs...)
 
-A wrapper around `PlotlyBase.Plot` to provide optimized visualization within
-Pluto notebooks exploiting `@htl` from HypertextLiteral.
+A wrapper around `PlotlyBase.Plot` that shows the plot in Pluto, VS Code,
+plain HTML files and KaimonSlate.
 
 # Fields
 - `Plot::PlotlyBase.Plot`
-- `plotly_listeners::Dict{String, Vector{HypertextLitera.JavaScript}}`
-- `js_listeners::Dict{String, Vector{HypertextLitera.JavaScript}}`
+- `plotly_listeners::Dict{String, Vector{String}}`
+- `js_listeners::Dict{String, Vector{String}}`
 - `classList::Vector{String}`
 - `script_contents::ScriptContents`
 
@@ -76,8 +76,8 @@ See also: [`ScriptContents`](@ref), [`add_js_listener!`](@ref), [`add_plotly_lis
 """
 Base.@kwdef struct PlotlyPlot
 	Plot::PlotlyBase.Plot
-	plotly_listeners::Dict{String, Vector{JS}} = Dict{String, Vector{JS}}()
-	js_listeners::Dict{String, Vector{JS}} = Dict{String, Vector{JS}}()
+	plotly_listeners::Dict{String, Vector{String}} = Dict{String, Vector{String}}()
+	js_listeners::Dict{String, Vector{String}} = Dict{String, Vector{String}}()
 	classList::Vector{String} = String[]
 	script_contents::ScriptContents = ScriptContents(deepcopy(_default_script_contents))
 end

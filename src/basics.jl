@@ -12,32 +12,29 @@ const RUNTIME_PLOTLY_SOURCE = Ref{Union{Nothing, Symbol}}(nothing)
 # PlotlyBase, so that the first `Layout()` does not parse a JSON file.
 const PLOTLYBASE_TEMPLATES = Dict(name => PlotlyBase.templates[name] for name in PlotlyBase.templates.available)
 const DEFAULT_TEMPLATE = Ref(PlotlyBase.templates[PlotlyBase.templates.default])
-const JS = HypertextLiteral.JavaScript
 
 """
 	ScriptContents
-Wrapper around a vector of `HypertextLiteral.JavaScript` elements. It has a custom print implementation of `HypertextLiteral.print_script` in order to allow serialization of its various elements inside a script tag.
+Wrapper around a vector of `String` elements, each a piece of JavaScript code. `render` writes the elements into the plot script, one per line.
 
 It is used inside the PlotlyPlot to allow modularity and ease customization of the script contents that is used to generate the plotlyjs plot in Javascript.
 """
 struct ScriptContents
-	vec::Vector{JS}
+	vec::Vector{String}
 end
 
-function HypertextLiteral.print_script(io::IO, value::ScriptContents)
+function Base.show(io::IO, ::MIME"text/javascript", value::ScriptContents)
 	for el ∈ value.vec
-		print(io, el.content, '\n')
+		print(io, el, '\n')
 	end
 end
 
-"""
-	htl_js(x)
-Simple convenience constructor for `HypertextLiteral.JavaScript` objects, renamed and re-exported from HypertextLiteral for convenience in case HypertextLiteral is not explicitly loaded alongisde PlotlyBaseExtras.
-
-See also: [`add_plotly_listeners!`](@ref)
-"""
-htl_js(x) = HypertextLiteral.JavaScript(x)
-htl_js(x::HypertextLiteral.JavaScript) = x
+# JS code goes into the script tag without escapes, so code that can end the tag or
+# start an HTML comment in it is not permitted.
+function _check_js(code::AbstractString)
+	occursin(r"</script|<!--"i, code) && throw(ArgumentError("JS code must not contain `</script` or `<!--`"))
+	return String(code)
+end
 
 
 current_cell_id()::Base.UUID = if is_inside_pluto()
@@ -45,15 +42,6 @@ current_cell_id()::Base.UUID = if is_inside_pluto()
 else
 	Base.UUID(zero(UInt128))
 end
-
-function Base.show(io::IO, mime::MIME"text/html", s::JS)
-    if is_inside_pluto()
-        show(io, mime, Markdown.MD(Markdown.Code("js",s.content)))
-    else
-        show(io, MIME"text/plain",s)
-    end
-end
-
 
 ## Plotly Settings ##
 # Each setting resolves in order: ScopedValue, runtime setter, Preferences.toml, default.
@@ -107,8 +95,8 @@ Prepends a CSS selector (represented by the argument `selector`) with a selector
 of the current pluto-cell (of the form `pluto-cell[id='cell_id']`, where
 `cell_id` is the currently running cell).
 
-It can be used to ease creating style sheets (using `@htl` from
-HypertextLiteral.jl) with selector that only apply to the cell where they are
+It can be used to ease creating style sheets (for example with the `@htl` macro,
+which you load yourself) with selector that only apply to the cell where they are
 executed.
 
 When called with a vector of selectors as input, prepends each selector and

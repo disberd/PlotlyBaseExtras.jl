@@ -13,8 +13,8 @@ p = plot([123, 456])
 # the same setup as the "Host rendering" testset in basic_coverage.jl.
 function render_pluto(pp)
     # The io key Pluto provides for published_to_js, as in basic_coverage.jl.
-    # print_script emits JS values and escapes `</` inside string literals.
-    publisher(io, x) = PlotlyBaseExtras.HypertextLiteral.print_script(io, x)
+    # It writes the published value with the writer of the other hosts.
+    publisher(io, x) = PlotlyBaseExtras.write_js(io, x)
     return sprint() do io
         render(IOContext(io, :pluto_published_to_js => publisher), PlutoHost(), pp)
     end
