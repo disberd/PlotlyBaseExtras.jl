@@ -114,6 +114,26 @@ _process_with_names(A::AbstractArray{<:Union{Number,AbstractVector{<:Number}},N}
         [_process_with_names(collect(s), fl, args...) for s ∈ eachslice(A; dims=ndims(A))]
     end
 
+# Arrays of floats and integers, with or without `missing`, become Float32 arrays.
+# For a new array type, the plain loop of `_float32_array` compiles less code than
+# the comprehensions above, `copyto!` or a broadcast. The first method also removes
+# the method ambiguity between the second method and the method above.
+_process_with_names(A::AbstractArray{<:Union{AbstractFloat,Signed,Unsigned}}, fl::Val{true}, @nospecialize(args::Vararg{AttrName})) =
+    _nested_arrays(_float32_array(Float32, A), fl, args...)
+_process_with_names(A::AbstractArray{<:Union{Missing,AbstractFloat,Signed,Unsigned}}, fl::Val{true}, @nospecialize(args::Vararg{AttrName})) =
+    _nested_arrays(_float32_array(Union{Missing,Float32}, A), fl, args...)
+function _float32_array(::Type{T}, A::AbstractArray) where {T}
+    B = Array{T}(undef, size(A))
+    i = 0
+    for x in A
+        B[i += 1] = x
+    end
+    return B
+end
+_nested_arrays(B::Vector, ::Val, @nospecialize(args::Vararg{AttrName})) = B
+_nested_arrays(B::Array, fl::Val, @nospecialize(args::Vararg{AttrName})) =
+    [_process_with_names(s, fl, args...) for s in eachslice(B; dims = ndims(B))]
+
 # Dict ans HasFields
 function _process_with_names(d::Dict, fl::Val, @nospecialize(args::Vararg{AttrName}))
     Dict{Any,Any}(k => if k isa Symbol

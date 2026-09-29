@@ -29,6 +29,13 @@ SlateExtensionsBase.slate_render(p::PlotlyBaseExtras.PlotlyPlot) = html_fragment
     "<div data-slate-keep=\"plotlybaseextras\"></div>" *
     sprint(io -> PlotlyBaseExtras.render(io, SlateHost(), p)))
 
+# Loading SlateExtensionsBase invalidates code in the PlotlyBaseExtras package image (the `==`, `hash`
+# and `convert` methods for `SlateExtensionsBase.Choice`). The package image of this extension keeps the
+# render code compiled after that load.
+PlotlyBaseExtras.PrecompileTools.@compile_workload begin
+    SlateExtensionsBase.slate_render(PlotlyBaseExtras.plot(PlotlyBaseExtras.scatter(y = rand(10))))
+end
+
 function __init__()
     provide_assets!(
         PlotlyBaseExtras,

@@ -5,7 +5,20 @@ function _host_script_contents(host::Host, pp::PlotlyPlot)
 	])
 end
 
-function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id(io))
+# A plot renders directly into an `IOBuffer` (`repr`, `sprint`, VS Code) or an
+# `IOContext{IOBuffer}` (Pluto), the IO types that the hosts pass. Another IO type
+# gets the render of an `IOContext{IOBuffer}` that has the properties of `io`, as
+# bytes. So with `@nospecialize`, a new IO type compiles only a few small methods.
+function render(@nospecialize(io::IO), host::Host, pp::PlotlyPlot; script_id = plotly_script_id(io))
+	buf = IOContext(IOBuffer(), io)
+	_render(buf, host, pp, script_id)
+	write(io, take!(buf.io))
+	return nothing
+end
+render(io::Union{IOBuffer,IOContext{IOBuffer}}, host::Host, pp::PlotlyPlot; script_id = plotly_script_id(io)) =
+	_render(io, host, pp, script_id)
+
+function _render(io::Union{IOBuffer,IOContext{IOBuffer}}, host::Host, pp::PlotlyPlot, script_id)
 	processed = _process_with_names(pp)
 	script_contents = _host_script_contents(host, pp)
 	loader = mathjax_loader(host, processed)
@@ -52,10 +65,10 @@ function render(io::IO, host::Host, pp::PlotlyPlot; script_id = plotly_script_id
 	""")
 end
 
-function Base.show(io::IO, ::MIME"application/vnd.julia-vscode.plotpane+html", p::PlotlyPlot)
+function Base.show(@nospecialize(io::IO), ::MIME"application/vnd.julia-vscode.plotpane+html", p::PlotlyPlot)
 	render(io, VSCodeHost(), p)
 end
 
-function Base.show(io::IO, ::MIME"text/html", p::PlotlyPlot)
+function Base.show(@nospecialize(io::IO), ::MIME"text/html", p::PlotlyPlot)
 	render(io, current_host(), p)
 end
