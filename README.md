@@ -2,9 +2,10 @@
 
 PlotlyBaseExtras renders PlotlyBase plots as interactive plotly.js figures in Pluto notebooks,
 plain HTML files, the VSCode plot pane, and KaimonSlate notebooks. A figure supports plotly event
-listeners, custom JS listeners, pop-out, resize, and clipboard export. MathJax renders LaTeX
-strings in titles and labels. The package re-exports PlotlyBase, so `plot`, `scatter`, and
-`Layout` need no extra `using`.
+listeners, custom JS listeners, resize, the Export pop-out, and PNG copy to the clipboard. When
+the browser refuses the clipboard write, the Copy dialog shows the PNG, and you copy it with
+right-click → Copy image. MathJax renders LaTeX strings in titles and labels. The package
+re-exports PlotlyBase, so `plot`, `scatter`, and `Layout` need no extra `using`.
 
 ## Installation
 
