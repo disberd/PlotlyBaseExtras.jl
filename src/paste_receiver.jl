@@ -1,5 +1,11 @@
 """
   plotly_paste_receiver(;popped = true)
+
+!!! warning "Deprecated"
+    This function is deprecated, and version 0.3 removes it. When the browser
+    refuses the clipboard write, the clipboard button of the plot opens a Copy
+    dialog with the image. You copy the image from that dialog.
+
 Create a widget that when shown inside a Pluto output generates a container
 specifically made for extracting images of exported plots obtained with the
 clipboard button on the plotly modebar.
@@ -9,7 +15,9 @@ represented by a clipboard icon on the top-right of the screen. When clicked
 upon, the container div is expanded and it will contain the last image that has
 been sent to the clipboard from a PlotlyBaseExtras plot.
 """
-plotly_paste_receiver(;popped = true) = HTML("""
+function plotly_paste_receiver(;popped = true)
+    Base.depwarn("`plotly_paste_receiver` is deprecated, and version 0.3 removes it. When the browser refuses the clipboard write, the clipboard button opens a Copy dialog with the image.", :plotly_paste_receiver)
+    return HTML("""
 <script src="https://kit.fontawesome.com/087fc9ff41.js" crossorigin="anonymous"></script>
 <paste-receiver class="plotlyplot noimage minimized $(popped ? "popped" : "")">
   <div class="header">
@@ -295,3 +303,4 @@ plotly_paste_receiver(;popped = true) = HTML("""
   }
 </style>
 """)
+end

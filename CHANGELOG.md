@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- `plotly_paste_receiver`. When the browser refuses the clipboard write, the clipboard button
+  opens a Copy dialog with the image. Version 0.3 removes the function.
+
 ## [0.2.0] - 2026-09-29
 
 ### Changed

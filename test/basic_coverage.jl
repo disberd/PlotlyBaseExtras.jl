@@ -47,7 +47,7 @@ let p = plot(rand(4))
     @test_throws "invalid keyword arguments" change_image_options!(p; heights = 400)
 end
 
-@test plotly_paste_receiver() isa HTML
+@test (@test_deprecated plotly_paste_receiver()) isa HTML
 
 @test get_plotly_version() === ARTIFACT_VERSION
 try
