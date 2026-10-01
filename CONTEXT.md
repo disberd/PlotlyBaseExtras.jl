@@ -12,3 +12,8 @@
   give it back, or the adapter can find it itself.
 - **Data channel**: the way a host moves the plot data from Julia to the page. Examples: text in
   the HTML, a Pluto published object. _Avoid_: carrier.
+- **Export pop-out**: the detached, resizable state of a container. Its header sets the width,
+  height, scale and filename of the exported image. A double-click on an export button opens it.
+  _Avoid_: detach, popped-out.
+- **Copy dialog**: the modal view that shows the exported PNG when the browser refuses a
+  clipboard write. The user copies the image from it by hand. _Avoid_: paste receiver, preview.

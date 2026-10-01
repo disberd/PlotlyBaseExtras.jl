@@ -177,27 +177,37 @@ function navigate(page, url; timeout = 30.0)
     return
 end
 
+"Grant the clipboard permission, add `init_script` to run before the page scripts of every new document, then load `url`."
+function open_url(page, url; timeout, init_script = "")
+    grant_clipboard(page)
+    isempty(init_script) || cdp_call(page, "Page.addScriptToEvaluateOnNewDocument";
+        params = Dict("source" => init_script), timeout = timeout)
+    navigate(page, url; timeout = timeout)
+    return
+end
+
 # --- public API -------------------------------------------------------------
 
 """
-    with_page(f, url; timeout = 30)
+    with_page(f, url; timeout = 30, init_script = "")
 
 Open `url` in headless Chrome and run `f(page)`. When `PLOTLY_CDP_URL` points
 at a running browser (for example `http://127.0.0.1:50006`), a new tab is
 created there and closed at the end; other tabs stay untouched. Every browser
-resource the helper created is always released.
+resource the helper created is always released. A non-empty `init_script`
+runs in the page before the page scripts.
 """
-function with_page(f, url::AbstractString; timeout = 30)
+function with_page(f, url::AbstractString; timeout = 30, init_script = "")
     cdp_url = get(ENV, "PLOTLY_CDP_URL", "")
     if !isempty(cdp_url)
-        return with_remote_page(f, url, cdp_url; timeout = timeout)
+        return with_remote_page(f, url, cdp_url; timeout = timeout, init_script = init_script)
     end
     chrome = find_chrome()
     chrome === nothing && error("no Chrome executable found, set CHROME_PATH")
-    return with_local_page(f, url, chrome; timeout = timeout)
+    return with_local_page(f, url, chrome; timeout = timeout, init_script = init_script)
 end
 
-function with_local_page(f, url, chrome; timeout = 30)
+function with_local_page(f, url, chrome; timeout = 30, init_script = "")
     user_data = mktempdir()
     proc = Ref{Union{Base.Process,Nothing}}(nothing)
     stderr_pipe = Base.Pipe()
@@ -215,7 +225,7 @@ function with_local_page(f, url, chrome; timeout = 30)
         cmd = pipeline(cmd; stderr = stderr_pipe)
         proc[] = run(cmd; wait = false)
         ws_base = devtools_base(stderr_pipe; timeout = timeout)
-        return with_page_target(f, ws_base, url; timeout = timeout)
+        return with_page_target(f, ws_base, url; timeout = timeout, init_script = init_script)
     finally
         kill_chrome(proc[])
         # Chrome helper processes can outlive the main process for a moment
@@ -233,7 +243,7 @@ function with_local_page(f, url, chrome; timeout = 30)
     end
 end
 
-function with_remote_page(f, url, cdp_url; timeout = 30)
+function with_remote_page(f, url, cdp_url; timeout = 30, init_script = "")
     base = rstrip(cdp_url, '/')
     version = JSON.parse(String(HTTP.get("$base/json/version").body))
     browser_ws = version["webSocketDebuggerUrl"]
@@ -245,8 +255,7 @@ function with_remote_page(f, url, cdp_url; timeout = 30)
         try
             ws_url = target_ws_url(base, target_id)
             return with_connected_page(ws_url; timeout = timeout) do page
-                grant_clipboard(page)
-                navigate(page, url; timeout = timeout)
+                open_url(page, url; timeout = timeout, init_script = init_script)
                 return f(page)
             end
         finally
@@ -256,12 +265,11 @@ function with_remote_page(f, url, cdp_url; timeout = 30)
     end
 end
 
-function with_page_target(f, http_base, url; timeout = 30)
+function with_page_target(f, http_base, url; timeout = 30, init_script = "")
     targets = JSON.parse(String(HTTP.get("$http_base/json/list").body))
     page_target = first(t for t in targets if get(t, "type", "") == "page")
     return with_connected_page(page_target["webSocketDebuggerUrl"]; timeout = timeout) do page
-        grant_clipboard(page)
-        navigate(page, url; timeout = timeout)
+        open_url(page, url; timeout = timeout, init_script = init_script)
         return f(page)
     end
 end
