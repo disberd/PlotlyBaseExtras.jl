@@ -24,21 +24,17 @@ default_plotly_template("none");
 
 # ╔═╡ afca425d-c420-4e52-85d1-848a8b0897c3
 md"""
-# Plot Resizer
+# Plot resizer
 """
 
 # ╔═╡ 913bb641-af82-4b62-9cee-bde13c70c592
 md"""
-Since version 0.4.2 of PlotlyBaseExtras, there is now a new feature that allows to pop-out the plot into a floating window in order to customize its size/scale before taking a snapshot.
+Each PlotlyBaseExtras plot has two more buttons in the modebar: a clipboard button and a camera button. The camera button has the same icon as the standard Plotly snapshot button.
 
-In all PlotlyBaseExtras plots, we now have two additional buttons in the modebar, one with the clipboard icon and one with the camera icon (The icon is the same as the usual snapshot button but the functionality is slightly different).
+- The clipboard button copies the plot to the clipboard as a PNG. Some pages do not allow this copy. On these pages, the button opens the **Copy dialog**. See the note below.
+- The camera button downloads the image as a file, as the standard Plotly download button does.
 
-- The clipboard button allows to copy the current plot onto the clipboard as a PNG, only works under certain conditions, see below.
-- The snapshot button will instead download the image as a file (similar to the standrd download button in plotly).
-
-The main functionality that was added though, is the possibility of easily customizing the options to give Plotly by detaching the plot object in a separate container that can be resized to find the right size for the image.
-
-To detach the plot object, double click either on the clipboard or on the snapshot button.
+A double-click on one of the two buttons opens the **Export pop-out**. The Export pop-out moves the plot into a floating container. In this container, you can resize the plot and set the width, height, scale, and filename of the exported image.
 """
 
 # ╔═╡ 87d2b9ab-0868-4955-9f58-9a17ff5c3e70
@@ -46,46 +42,42 @@ plot(1:5; config = PlotConfig(;displayModeBar = true))
 
 # ╔═╡ 987eeb12-85c5-43de-aaec-8684e1d397c8
 md"""
-## Clipboard Copy UI
+## Copy dialog and Export pop-out
 """
 
 # ╔═╡ 541e19e4-0426-4ff8-82c0-98ea0137ba83
 md"""
-!!! note "Clipboard Working Conditons"
-	The functionality to paste to the Clipboard does not work in Firefox (as clipboard access from JS is very limited in firefox). \
-	It is also limited in Chrome (or Chromium/Edge) to either static html exports (so files), or connection to a Pluto running server either through **localhost** or **https**. \
-	This is a mild limitations as most of the use cases in chrome should fall within those conditions. See the [relevant docs](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard) for more details.\
-	\
-	The package also provides a convenience widget to grab the image from the clipboard icon even on browser that do not support directly writing to the clipboard. This widget can be created using the `plotly_paste_receiver` function that is exported by this package. See the heading below for more informations.
+!!! note "Clipboard working conditions"
+	On a secure page, the clipboard button copies the PNG to the clipboard. Secure pages include pages on **https**, pages on **localhost**, and static HTML exports that you open as files. See the [MDN page about `Navigator.clipboard`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard) for more details.
+
+	On other pages, or when the browser refuses the clipboard write, the button opens the **Copy dialog**. The Copy dialog shows the PNG at full size. To copy the image, right-click it and select **Copy image** (or **Save image as…**). To close the Copy dialog, press Esc, click **Close**, or click outside the dialog.
+
+	The tooltip of the clipboard button tells you which mode applies on the current page: "Copy PNG to clipboard" or "Show PNG to copy".
+
+	Firefox 127 and later versions can copy the PNG to the clipboard. Earlier Firefox versions open the Copy dialog.
+
+	The Copy dialog replaces the `plotly_paste_receiver` widget. The `plotly_paste_receiver` function is deprecated, and version 0.3 removes it.
 """
 
 # ╔═╡ 24156eed-3d09-4206-8bf4-217720a4a458
 md"""
-When double clicking on the clipboard container, the container will popup with some border and a header on top of the plot, like in the image below:
+A double-click on the clipboard button opens the Export pop-out. The plot container gets a border, and a header appears above the plot, as in the image below:
 ![image](https://github.com/JuliaPluto/PlutoPlotly.jl/assets/12846528/ff2a1a43-6bd3-42c4-8a37-8ab518084040)
 """
 
 # ╔═╡ 4416aff1-19b4-4453-bd43-cccbbf6e2527
 md"""
-You can notice that the header parameters have all different colored labels. By default when you popout the container above the first time these will be all black, but the color give you some helpful information:
--  **Black**: This label has no preset config option so when you press the clipboard icon to copy the image.$br When exporting the plot, **the current value** (680 for width in the example above) will be sent to plotly for generting the image
--  $(html"<span style='color: var(--cm-tag-color); font-weight: bold;'>Red</span>"): There is a config value set as default for this parameter when exporting the plot, and its value is different from the currently visualized one. $br When exporting the plot, **the default value will be used instead of the visualized one**
--  $(html"<span style='color: var(--cm-macro-color); font-weight: bold;'>Green</span>"): There is a config value set for this parameter and it matches the one visualized in the UI.
+The labels in the header have different colors. When you open the Export pop-out for the first time, all labels are black. The color of a label tells you which value the export uses:
+-  **Black**: The plot config has no value for this parameter. When you export the plot, the export uses **the current value** (680 for the width in the image above).
+-  $(html"<span style='color: var(--cm-tag-color); font-weight: bold;'>Red</span>"): The plot config has a value for this parameter, and this value is different from the current value. When you export the plot, the export uses **the config value**.
+-  $(html"<span style='color: var(--cm-macro-color); font-weight: bold;'>Green</span>"): The plot config has a value for this parameter, and this value is the same as the current value.
 
-The displayed values for width and height represent the acutal width and height **of the plot area** and will adapt to the container window, that can be resized by dragging from its lower right corner.
+The width and height in the header are the width and height **of the plot area**. They change when you resize the container. To resize the container, drag its lower-right corner.
 
-Each of these paremeters can also be modified manually by clicking on the numbers in the header and modifying them. The plot will update depending on the input value as soon as Enter is pressed, or the span with the number being modified is moved out of focus.
+To change a value, click the number in the header and type a new value. The plot updates when you press Enter, or when the number loses focus.
 
-Lastly, the container can be moved around by dragging it from the header. As soon as one clicks outside of the container, the plot will be put back into its originating cell.
+To move the container, drag its header. When you click outside the container, the Export pop-out closes and the plot goes back to its cell.
 """
-
-# ╔═╡ 55b23a29-b02f-4b35-bb83-a494e8d6f32b
-md"""
-## Paste Receiver Widget
-"""
-
-# ╔═╡ 26c7ef45-644c-4d01-a57c-3c3774b9c24d
-
 
 # ╔═╡ 7b815ea5-9e3d-4379-9daf-bfac9bfac1c4
 md"""
@@ -494,8 +486,6 @@ version = "17.7.0+0"
 # ╟─541e19e4-0426-4ff8-82c0-98ea0137ba83
 # ╟─24156eed-3d09-4206-8bf4-217720a4a458
 # ╟─4416aff1-19b4-4453-bd43-cccbbf6e2527
-# ╟─55b23a29-b02f-4b35-bb83-a494e8d6f32b
-# ╠═26c7ef45-644c-4d01-a57c-3c3774b9c24d
 # ╟─7b815ea5-9e3d-4379-9daf-bfac9bfac1c4
 # ╠═9ce0ffe5-43da-4d2d-abde-37ff845fd019
 # ╠═fe091a2b-a7cc-45a8-811b-efda254d0932
