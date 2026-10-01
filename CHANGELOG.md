@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- When the browser refuses the clipboard write, the modebar clipboard button opens a Copy
+  dialog with the PNG. Copy the image with right-click → "Copy image". This works in all hosts.
+
+### Changed
+
+- The tooltip of the clipboard button says what the button does on the current page and names
+  the double-click export options. A page without the clipboard API shows no `alert()`.
+
 ### Deprecated
 
 - `plotly_paste_receiver`. When the browser refuses the clipboard write, the clipboard button

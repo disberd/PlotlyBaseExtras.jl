@@ -140,3 +140,37 @@ span.config-value {
 	fill: green !important;
 	transition: fill 200ms;
 }
+
+/* Copy dialog: shows the exported PNG at 1:1 when the clipboard write is not possible.
+   The hosts can have no colour variables, so give a fallback. */
+.plotlyplot-copy-dialog {
+	max-width: 95vw;
+	max-height: 95vh;
+	overflow: auto;
+	padding: 0;
+	color: inherit;
+	background: var(--main-bg-color, Canvas);
+	border: 3px solid var(--kbd-border-color, GrayText);
+	border-radius: 12px;
+}
+.plotlyplot-copy-dialog::backdrop {
+	background: rgba(0, 0, 0, 0.5);
+}
+.plotlyplot-copy-dialog .copy-dialog-content {
+	padding: 8px;
+}
+.plotlyplot-copy-dialog .copy-dialog-header {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+	margin-bottom: 8px;
+}
+.plotlyplot-copy-dialog .copy-dialog-hint {
+	flex: 1;
+}
+/* Hosts such as Pluto set img { max-width: 100% }. The image must keep its export size. */
+.plotlyplot-copy-dialog img {
+	display: block;
+	max-width: none;
+	max-height: none;
+}
