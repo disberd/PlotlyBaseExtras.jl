@@ -13,8 +13,11 @@ rendered = slate_render(p)
 html = rendered.html
 @test occursin("123", html)
 @test occursin("renderPlot(", html)
-# The plot mounts in a holder that Slate keeps across runs of the cell.
-@test startswith(html, "<div data-slate-keep=\"plotlybaseextras\"></div>")
+# The plot mounts in a holder that Slate keeps across runs of the cell. The holder keeps the
+# plot height before the script runs: `layout.height`, else the 400 px default of the container.
+@test startswith(html, "<div data-slate-keep=\"plotlybaseextras\" style=\"min-height: 400px\"></div>")
+@test startswith(slate_render(plot([1], Layout(height = 250))).html,
+    "<div data-slate-keep=\"plotlybaseextras\" style=\"min-height: 250px\"></div>")
 @test occursin("/ext-assets/PlotlyBaseExtras/plotly-esm-min.mjs", html)
 
 with(plotly_version => "2.33") do
