@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- In KaimonSlate, a plot output keeps its height while plotly.js loads. Before, a new output was
+  0 px tall until the plot drew, so the notebook moved and the live deck changed its scale.
+
 ## [0.2.1] - 2026-10-01
 
 ### Added

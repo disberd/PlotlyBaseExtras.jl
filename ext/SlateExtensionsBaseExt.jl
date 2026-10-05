@@ -25,9 +25,17 @@ end
 
 # The holder before the script is where the Slate adapter mounts the plot. Slate keeps an element
 # marked `data-slate-keep` across runs of the cell, so the plot updates in place.
-SlateExtensionsBase.slate_render(p::PlotlyBaseExtras.PlotlyPlot) = html_fragment(
-    "<div data-slate-keep=\"plotlybaseextras\"></div>" *
-    sprint(io -> PlotlyBaseExtras.render(io, SlateHost(), p)))
+# A new holder stays empty until the script loads plotly.js. Its min-height keeps the plot height
+# during that time, so the output does not collapse. The height is the height that
+# `lib/container.js` gives the container: `layout.height`, else 400 px. The adapter removes the
+# min-height when the container is in the holder.
+function SlateExtensionsBase.slate_render(p::PlotlyBaseExtras.PlotlyPlot)
+    h = p.layout[:height]
+    html_fragment(sprint() do io
+        print(io, "<div data-slate-keep=\"plotlybaseextras\" style=\"min-height: ", h isa Real ? h : 400, "px\"></div>")
+        PlotlyBaseExtras.render(io, SlateHost(), p)
+    end)
+end
 
 # Loading SlateExtensionsBase invalidates code in the PlotlyBaseExtras package image (the `==`, `hash`
 # and `convert` methods for `SlateExtensionsBase.Choice`). The package image of this extension keeps the
