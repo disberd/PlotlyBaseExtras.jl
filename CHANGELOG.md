@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-10-05
+
 ### Fixed
 
 - In KaimonSlate, a plot output keeps its height while plotly.js loads. Before, a new output was
@@ -95,7 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings for the plotly.js source (`:auto`, `:cdn`, `:inline`, `:hosted`) and the plotly.js
   version.
 
-[unreleased]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.2.1...HEAD
+[unreleased]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/disberd/PlotlyBaseExtras.jl/compare/v0.1.0...v0.1.1
