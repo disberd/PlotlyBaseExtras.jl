@@ -38,7 +38,7 @@ add_class!, remove_class!, add_js_listener!, default_plotly_template,
 get_image_options, change_image_options!, plotly_paste_receiver
 export plot, push_script!, prepend_cell_selector
 export make_subplots
-export enable_plotly_offline
+export enable_plotly_offline, savehtml
 # From utilities.jl
 export sample_colorscheme, discrete_colorscale
 # Package UUID. The notebooks load this package through PlutoDevMacros, where the module has no package id, so preferences are read by UUID.

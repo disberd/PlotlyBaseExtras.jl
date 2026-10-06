@@ -110,15 +110,17 @@ mathjax_auto_source(::Host) = :cdn
 
 # Resolve the MathJax source with the same table and fallback as plotly.js.
 # `:hosted` means the page provides MathJax, so the core waits for it.
-function mathjax_script(host::Host, version)
+function resolved_mathjax_source(host::Host)
 	source = get_mathjax_source()
 	source = source === :auto ? mathjax_auto_source(host) : source
 	if !(source in supported_sources(host))
 		@warn "The source :$source is not supported by $(typeof(host).name.name), using :$(mathjax_auto_source(host)) instead" maxlog=1 _id=(:unsupported_mathjax_source, typeof(host), source)
 		source = mathjax_auto_source(host)
 	end
-	return mathjax_script(host, Val(source), version)
+	return source
 end
+
+mathjax_script(host::Host, version) = mathjax_script(host, Val(resolved_mathjax_source(host)), version)
 
 # Only the v3 bundle path is known. The v4 path is one line when needed.
 mathjax_cdn_url(v) = "https://cdn.jsdelivr.net/npm/mathjax@$(VersionNumber(v))/es5/tex-svg.js"

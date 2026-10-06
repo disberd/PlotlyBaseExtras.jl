@@ -1,12 +1,14 @@
 using Test
 using PlotlyBaseExtras
-using PlotlyBaseExtras: PlainHTML, render
+using PlotlyBaseExtras: PlainHTML, render, write_js
 using ScopedValues
 const BH = BrowserHelper
 
 p1 = plot(scatter(; x = [1, 2, 3], y = [2, 1, 3]), Layout(; title = "Plain"))
 add_js_listener!(p1, "click", "(e) => console.log('host test click')")
 p2 = plot(scatter(; x = [1, 2, 3], y = [3, 1, 2]), Layout(; title = L"$\alpha^2$"))
+
+@test_throws ArgumentError savehtml(IOBuffer())
 
 if !BH.chrome_available()
     @warn "Chrome not found: skipping browser tests. Set CHROME_PATH to run them."
@@ -15,14 +17,7 @@ else
     # The modebar clipboard button, found by a hook that does not depend on the tooltip text.
     COPY_BUTTON = ".modebar-btn[data-val=\"plotlyplot-copy\"]"
     # One complete page with both plots, served over http so the clipboard API works.
-    page_html = sprint() do io
-        print(io, """<!doctype html><html><head><meta charset="utf-8"></head><body>""")
-        render(io, PlainHTML(), p1)
-        render(io, PlainHTML(), p2)
-        print(io, "</body></html>")
-    end
-    path = joinpath(mktempdir(), "plain_html_host.html")
-    write(path, page_html)
+    path = savehtml(joinpath(mktempdir(), "plain_html_host.html"), p1, p2; title = "Plain page")
 
     BH.with_file(path) do page
         # Plotly and MathJax load from the network, so allow generous timeouts.
@@ -31,6 +26,9 @@ else
 
         @test isempty(BH.console_errors(page))
         @test BH.count_nodes(page, ".js-plotly-plot") == 2
+        @test BH.evaluate(page, "document.title") == "Plain page"
+        # The MathJax loader adds a script element without an id.
+        @test BH.evaluate(page, "Array.from(document.scripts, s => s.id).filter(Boolean).join(' ')") == "plot_1 plot_2"
         @test BH.has_visible_svg(page, ".gtitle-math-group")
 
         # A real mouse click on a point of the first plot fires the custom listener.
@@ -147,18 +145,21 @@ else
         @test isempty(BH.console_errors(page))
     end
 
-    # `:inline` embeds the plotly.js bundle in the page and imports it from a blob URL.
-    inline_html = sprint() do io
-        print(io, """<!doctype html><html><head><meta charset="utf-8"></head><body>""")
-        with(PlotlyBaseExtras.plotly_source => :inline) do
-            render(io, PlainHTML(), p1)
-        end
-        print(io, "</body></html>")
+    # An `:inline` page holds each library one time and loads nothing from the network.
+    inline_path = with(PlotlyBaseExtras.plotly_source => :inline, PlotlyBaseExtras.mathjax_source => :inline) do
+        savehtml(joinpath(mktempdir(), "plain_html_inline.html"), p1, p2)
     end
-    inline_path = joinpath(mktempdir(), "plain_html_inline.html")
-    write(inline_path, inline_html)
+    inline_html = read(inline_path, String)
+    bundle_js(code) = sprint(write_js, code)
+    @test count(bundle_js(PlotlyBaseExtras.get_local_plotly_contents(get_plotly_version())), inline_html) == 1
+    @test count(bundle_js(PlotlyBaseExtras.get_local_mathjax_contents(get_mathjax_version())), inline_html) == 1
     BH.with_file(inline_path) do page
-        BH.wait_for(page, "document.querySelector('.js-plotly-plot .main-svg') !== null"; timeout = 60)
+        BH.wait_for(page, "document.querySelectorAll('.js-plotly-plot .main-svg').length >= 2"; timeout = 60)
+        BH.wait_for(page, "document.querySelector('.gtitle-math-group svg') !== null"; timeout = 60)
+        @test BH.has_visible_svg(page, ".gtitle-math-group")
         @test isempty(BH.console_errors(page))
+        @test BH.evaluate(page, """
+            performance.getEntriesByType('resource').map(e => e.name).filter(n => /esm\\.sh|jsdelivr/.test(n)).length
+        """) == 0
     end
 end

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `savehtml(path_or_io, plots...; title, head)` writes a standalone HTML page with one or more
+  independent plots. With the `:inline` source, the page holds plotly.js and MathJax one time
+  for all plots, and shows without a network connection.
+
 ## [0.2.2] - 2026-10-05
 
 ### Fixed

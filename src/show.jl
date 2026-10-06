@@ -104,3 +104,70 @@ end
 function Base.show(@nospecialize(io::IO), ::MIME"text/html", p::PlotlyPlot)
 	render(io, current_host(), p)
 end
+
+"""
+	savehtml(path_or_io, plots...; title = "", head = "")
+
+Write one standalone HTML page with `plots` to `path_or_io` and return `path_or_io`. Each plot is
+a `PlotlyPlot` or a `PlotlyBase.Plot`. The plots are independent and show one below the other, in
+the order of the arguments.
+
+The page writes `title` in its `<title>` element. It writes `head` as it is in its `<head>`
+element, for example a `<style>` element.
+
+The `plotly_source` and `mathjax_source` settings select where plotly.js and MathJax load from,
+with the same rules as a plain HTML plot. With the `:inline` source, the page holds each library
+one time for all plots and shows the plots without a network connection.
+
+# Examples
+```julia
+savehtml("plots.html", p1, p2; title = "Two plots")
+
+# A page that shows without a network connection
+with(PlotlyBaseExtras.plotly_source => :inline, PlotlyBaseExtras.mathjax_source => :inline) do
+	savehtml("plots.html", p1, p2)
+end
+```
+"""
+function savehtml(path::AbstractString, plots::Union{PlotlyPlot,PlotlyBase.Plot}...; kwargs...)
+	isempty(plots) && throw(ArgumentError("savehtml needs at least one plot"))
+	open(io -> savehtml(io, plots...; kwargs...), path, "w")
+	return path
+end
+
+function savehtml(@nospecialize(io::IO), plots::Union{PlotlyPlot,PlotlyBase.Plot}...; title = "", head = "")
+	isempty(plots) && throw(ArgumentError("savehtml needs at least one plot"))
+	pps = map(p -> p isa PlotlyPlot ? p : PlotlyPlot(p), plots)
+	# The sources resolve as for a plain HTML plot. An `:inline` library goes in the page
+	# head one time, and the plots load it from there as `:hosted`.
+	version = get_plotly_version()
+	plotly_src = resolved_plotly_source(PlainHTML(), version)
+	mathjax_src = resolved_mathjax_source(PlainHTML())
+	write(io, "<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>",
+		_escape_attribute(title), "</title>\n", head, "\n")
+	js = MIME"text/javascript"()
+	if plotly_src === :inline
+		# The head stores a promise: a classic script cannot use a top-level `await`.
+		write(io, "<script>\nwindow.plutoplotly_imports = window.plutoplotly_imports ?? {};\nwindow.plutoplotly_imports[")
+		write_js(io, string(VersionNumber(version)))
+		write(io, "] = (async () => ")
+		show(io, js, plotly_import(PlainHTML(), Val(:inline), version))
+		write(io, ")();\n</script>\n")
+	end
+	# ponytail: this processes each plot one more time, only for an `:inline` MathJax page.
+	if mathjax_src === :inline && any(pp -> _mathjax_wanted(_process_with_names(pp)), pps)
+		# The loader sets the page MathJax promise before its first `await`, so the plots find it.
+		write(io, "<script>\n(async () => {\n")
+		show(io, js, mathjax_script(PlainHTML(), Val(:inline), get_mathjax_version()))
+		write(io, "})();\n</script>\n")
+	end
+	write(io, "</head>\n<body>\n")
+	hosted(src) = src === :inline ? :hosted : src
+	with(plotly_source => hosted(plotly_src), mathjax_source => hosted(mathjax_src)) do
+		for (i, pp) in enumerate(pps)
+			render(io, _PlainHTMLPage(), pp; script_id = "plot_$i")
+		end
+	end
+	write(io, "</body>\n</html>\n")
+	return io
+end

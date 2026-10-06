@@ -173,8 +173,9 @@ function _ImportedHybridJS(v)
 end
 
 
+# The page value can be the module or a promise of it: the `savehtml` page head stores a promise.
 function Base.show(io::IO, m::MIME"text/javascript", i::_ImportedHybridJS)
-    write(io, "window.$(i.object)?.['$(i.key)'] ??")
+    write(io, "(await window.$(i.object)?.['$(i.key)']) ?? ")
     show(io, m, i.fallback)
 end
 # function Base.show(io::IO, m::MIME"text/javascript", i::_ImportedHybridJS)

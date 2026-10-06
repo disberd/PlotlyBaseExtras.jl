@@ -32,22 +32,22 @@ plot(scatter(x = 1:10, y = rand(10)), Layout(title = "A plot in Pluto"))
 
 ### Plain HTML
 
-`render` writes the HTML of one plot. The following code writes a complete page:
+`savehtml` writes a standalone HTML page with one or more independent plots, one below the
+other:
 
 ```julia
 using PlotlyBaseExtras
 
-p = plot(scatter(x = 1:10, y = rand(10)), Layout(title = "A plot in a file"))
+p1 = plot(scatter(x = 1:10, y = rand(10)), Layout(title = "First plot"))
+p2 = plot(bar(x = 1:5, y = rand(5)), Layout(title = "Second plot"))
 
-open("plot.html", "w") do io
-    println(io, """<!doctype html><html><head><meta charset="utf-8"></head><body>""")
-    PlotlyBaseExtras.render(io, PlotlyBaseExtras.PlainHTML(), p)
-    println(io, "</body></html>")
-end
+savehtml("plots.html", p1, p2; title = "Two plots")
 ```
 
-Outside Pluto, `show(io, MIME"text/html"(), p)` writes the same HTML, because `current_host()`
-returns `PlainHTML()` there.
+The `head` keyword adds HTML to the page head, for example a `<style>` element. To write your own
+page, use `PlotlyBaseExtras.render(io, PlotlyBaseExtras.PlainHTML(), p; script_id)`. It writes
+the HTML of one plot. Outside Pluto, `show(io, MIME"text/html"(), p)` writes the same HTML,
+because `current_host()` returns `PlainHTML()` there.
 
 ### VSCode plot pane
 
@@ -96,7 +96,7 @@ using ScopedValues
 
 # ScopedValue, for the duration of `with`
 with(PlotlyBaseExtras.plotly_source => :inline) do
-    PlotlyBaseExtras.render(io, PlotlyBaseExtras.PlainHTML(), p)
+    savehtml("plots.html", p1, p2)
 end
 
 # Runtime setter, for the rest of the session
@@ -108,6 +108,9 @@ change_plotly_source(:inline)
 [PlotlyBaseExtras]
 plotly_source = "inline"
 ```
+
+A page from `savehtml` holds each `:inline` library one time for all its plots. With
+`plotly_source` and `mathjax_source` both `:inline`, the page shows without a network connection.
 
 `force_mathjax_local(true)` sets `svg.fontCache` to `"local"` in the MathJax config. With the
 `global` font cache, the math in a plot does not display. When the page provides MathJax

@@ -2,6 +2,9 @@ abstract type Host end
 struct PlainHTML <: Host end
 struct PlutoHost <: Host end
 struct VSCodeHost <: Host end
+# The host of the plots on a page from `savehtml`. The page head holds the `:inline`
+# bundles, so the plots load them as `:hosted`. Everything else is as `PlainHTML`.
+struct _PlainHTMLPage <: Host end
 
 current_host() = is_inside_pluto() ? PlutoHost() : PlainHTML()
 
@@ -21,23 +24,28 @@ to_js(::PlutoHost, x) = AbstractPlutoDingetjes.Display.published_to_js(x)
 # which one `:auto` picks.
 supported_sources(::Host) = (:cdn, :inline)
 supported_sources(::PlutoHost) = (:cdn, :inline, :hosted)
+supported_sources(::_PlainHTMLPage) = (:cdn, :inline, :hosted)
 
 auto_source(::Host, version) = :cdn
 auto_source(::PlutoHost, version) = :hosted
 
-function plotly_import(host::Host, version)
+# The source that the settings select for `host`. An unsupported source gives one
+# warning and the `:auto` source of the host.
+function resolved_plotly_source(host::Host, version)
 	source = get_plotly_source()
 	source = source === :auto ? auto_source(host, version) : source
 	if !(source in supported_sources(host))
 		@warn "The source :$source is not supported by $(typeof(host).name.name), using :$(auto_source(host, version)) instead" maxlog=1 _id=(:unsupported_plotly_source, typeof(host), source)
 		source = auto_source(host, version)
 	end
-	return plotly_import(host, Val(source), version)
+	return source
 end
+
+plotly_import(host::Host, version) = plotly_import(host, Val(resolved_plotly_source(host, version)), version)
 
 plotly_import(::Host, ::Val{:cdn}, version) = _ImportedRemoteJS(get_plotly_esm_url(version), "default")
 plotly_import(host::Host, ::Val{:inline}, version) = _ImportedLocalJS(to_js(host, get_local_plotly_contents(version)), "default")
-plotly_import(::PlutoHost, ::Val{:hosted}, version) = _ImportedHybridJS(version)
+plotly_import(::Union{PlutoHost,_PlainHTMLPage}, ::Val{:hosted}, version) = _ImportedHybridJS(version)
 
 # The adapter JS and the code around the script body. The default mounts the
 # container beside the script tag in an async function, so `await import()` works.
