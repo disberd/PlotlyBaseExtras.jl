@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for PlotlyBase 0.9 and 0.10. These versions keep the attributes of traces and layouts
   in a `JSON.Object`, and the plot processing now accepts each `AbstractDict`.
 
+### Changed
+
+- In KaimonSlate 1.10 or later (SlateExtensionsBase 0.11), the numeric arrays of a plot with
+  1000 or more numbers go to the page as raw bytes in a cell asset. The cell output no longer
+  contains them as JSON text, so the notebook state is smaller and the plot draws sooner. The
+  asset goes into the cell memo and into a static export. Where Slate keeps no cell assets (for
+  example a plot in a markdown `{{ }}` interpolation), the data stays JSON.
+- The compat bound of SlateExtensionsBase is now `0.10, 0.11`.
+
 ## [0.2.2] - 2026-10-05
 
 ### Fixed
