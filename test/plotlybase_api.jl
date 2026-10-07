@@ -318,8 +318,8 @@ end
         @test p1.data == p2.data
     end
     @test p1.data[1] isa GenericTrace
-    @test p1.data[1].marker isa Dict
-    @test p1.data[1].marker_line isa Dict
+    @test p1.data[1].marker isa AbstractDict
+    @test p1.data[1].marker_line isa AbstractDict
     @test p1.data[1].marker_line_width isa Number
 
 end

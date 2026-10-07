@@ -16,6 +16,13 @@ end
 
 @testitem "Coverage Improvements" begin include("basic_coverage.jl") end
 @testitem "Extensions" begin include("extensions.jl") end
+# PlutoPlotly limits PlotlyBase to 0.8, so only one CI job installs it.
+@testitem "PlotlyExtensionsHelper over PlutoPlotly" skip = Base.find_package("PlutoPlotly") === nothing begin
+    # PlutoPlotly registers itself with a lower priority, so the result proves that
+    # this package wins over it.
+    import PlotlyExtensionsHelper, PlutoPlotly
+    @test PlotlyExtensionsHelper.plotly_plot(rand(5)) isa PlotlyBaseExtras.PlotlyPlot
+end
 @testitem "Slate Host" begin include("slate_host.jl") end
 @testitem "VSCode Host" begin include("vscode_host.jl") end
 @testitem "PlotlyBase API" begin include("plotlybase_api.jl") end
