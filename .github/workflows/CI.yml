@@ -40,6 +40,23 @@ jobs:
         run: julia --project -e 'using Pkg; Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
+  # PlutoPlotly limits PlotlyBase to 0.8, so the jobs above do not install it.
+  # This job adds both to the `test` project. It runs the full suite on
+  # PlotlyBase 0.8, and it also runs the test item that needs PlutoPlotly.
+  test-plotlybase-0_8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: '1.12'
+      - uses: julia-actions/cache@v3
+      - name: Add PlutoPlotly and PlotlyBase 0.8 to the test project
+        run: julia --project=test -e 'using Pkg; Pkg.add([PackageSpec(name = "PlutoPlotly"), PackageSpec(name = "PlotlyBase", version = "0.8")])'
+      - name: Instantiate project at the repo root
+        run: julia --project -e 'using Pkg; Pkg.instantiate()'
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
   eslint:
     runs-on: ubuntu-latest
     steps:

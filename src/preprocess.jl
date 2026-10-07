@@ -135,7 +135,7 @@ _nested_arrays(B::Array, fl::Val, @nospecialize(args::Vararg{AttrName})) =
     [_process_with_names(s, fl, args...) for s in eachslice(B; dims = ndims(B))]
 
 # Dict ans HasFields
-function _process_with_names(d::Dict, fl::Val, @nospecialize(args::Vararg{AttrName}))
+function _process_with_names(d::AbstractDict, fl::Val, @nospecialize(args::Vararg{AttrName}))
     Dict{Any,Any}(k => if k isa Symbol
         # We have this branch as we might have plotly properties here and we assume
         # they are if the dict key is a symbol.
@@ -144,7 +144,7 @@ function _process_with_names(d::Dict, fl::Val, @nospecialize(args::Vararg{AttrNa
         _process_with_names(v, fl, args...)
     end for (k, v) in pairs(d))
 end
-function _process_with_names(d::Dict{Symbol}, fl::Val, @nospecialize(args::Vararg{AttrName}))
+function _process_with_names(d::AbstractDict{Symbol}, fl::Val, @nospecialize(args::Vararg{AttrName}))
     Dict{Symbol,Any}(k => _process_with_names(v, fl, AttrName(k), args...) for (k, v) in pairs(d))
 end
 # We have a separate one because it seems to reduce allocations

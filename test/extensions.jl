@@ -51,7 +51,7 @@ uv_a_strip = ustrip.(uv_a)
 @test _process_with_names(uv_a) == _process_with_names(uv_a_strip)
 
 ## PlotlyExtensionsHelper Extension ##
-# PlutoPlotly registers itself with a lower priority, so the result proves that
+# PlotlyBase registers itself with a lower priority, so the result proves that
 # this package wins over it.
-import PlotlyExtensionsHelper, PlutoPlotly
+import PlotlyExtensionsHelper
 @test PlotlyExtensionsHelper.plotly_plot(rand(5)) isa PlotlyBaseExtras.PlotlyPlot
