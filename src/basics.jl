@@ -3,6 +3,8 @@ const plotly_version = ScopedValue{Union{Nothing, String, VersionNumber}}(nothin
 const plotly_source = ScopedValue{Union{Nothing, Symbol}}(nothing)
 const RUNTIME_PLOTLY_VERSION = Ref{Union{Nothing, String, VersionNumber}}(nothing)
 const RUNTIME_PLOTLY_SOURCE = Ref{Union{Nothing, Symbol}}(nothing)
+const slate_asset_min_length = ScopedValue{Union{Nothing, Integer}}(nothing)
+const RUNTIME_SLATE_ASSET_MIN_LENGTH = Ref{Union{Nothing, Integer}}(nothing)
 # The first template load of the precompile process must run inside a workload:
 # the package image keeps the code of a runtime dispatch only when that code
 # compiles inside a workload.
@@ -85,6 +87,24 @@ function get_plotly_source()::Symbol
 	s isa Symbol || (s = Symbol(s))
 	return _check_source(s)
 end
+
+# In KaimonSlate, a numeric vector of the plot data with at least this many numbers goes to the page
+# as raw bytes in a cell asset, not as JSON text. A number larger than any vector, for example
+# `typemax(Int)`, keeps all the data as JSON.
+function _check_min_length(n)
+	(n isa Integer && n >= 1) || throw(ArgumentError("slate_asset_min_length must be a positive integer, got $(repr(n))"))
+	return Int(n)
+end
+
+function change_slate_asset_min_length(n)
+	if n === nothing
+		RUNTIME_SLATE_ASSET_MIN_LENGTH[] = nothing
+		return nothing
+	end
+	RUNTIME_SLATE_ASSET_MIN_LENGTH[] = _check_min_length(n)
+end
+
+get_slate_asset_min_length()::Int = _check_min_length(@something slate_asset_min_length[] RUNTIME_SLATE_ASSET_MIN_LENGTH[] Preferences.load_preference(PLOTLY_UUID, "slate_asset_min_length") 10_000)
 
 ## Prepend Cell Selector ##
 """

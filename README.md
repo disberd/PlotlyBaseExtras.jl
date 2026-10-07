@@ -87,6 +87,14 @@ next render, with no reload. Put preferences in the `[PlotlyBaseExtras]` table o
 | `mathjax_version` | version, for example `"3.2.2"` | `3.2.2` | `PlotlyBaseExtras.mathjax_version`, `change_mathjax_version`, key `mathjax_version` |
 | `mathjax_source` | `:auto`, `:cdn`, `:inline`, `:hosted` | `:auto` | `PlotlyBaseExtras.mathjax_source`, `change_mathjax_source`, key `mathjax_source` |
 | `force_mathjax_local` | `true`, `false` | `false` | `force_mathjax_local(true)` |
+| `slate_asset_min_length` | positive integer | `10000` | `PlotlyBaseExtras.slate_asset_min_length`, `change_slate_asset_min_length`, key `slate_asset_min_length` |
+
+In KaimonSlate 1.10 or later, a numeric vector of the plot data with at least
+`slate_asset_min_length` numbers goes to the page as raw bytes in a cell asset, not as JSON text in
+the cell output. The rows of a matrix count together. The asset makes a large plot draw sooner and
+keeps the notebook state small, but the page fetches it in a second request. When the browser is
+far from the Slate server, set a larger value. A value larger than any vector, for example
+`typemax(Int)`, keeps all the data as JSON.
 
 The first name in each row is the ScopedValue. The following code shows the three ways to set
 `plotly_source`:

@@ -26,8 +26,8 @@ end
 # Large numeric vectors of the plot data go to the page as raw bytes in one Slate cell asset, not as
 # JSON text in the script. The asset stays in the cell memo and goes into a static export. The page
 # reads each vector as a typed array view of the asset, without a parse. The rest of the data stays
-# JSON, with a `{"__pbe_bin": [type, byte offset, length]}` marker in place of each vector.
-const BIN_MIN_LENGTH = 1000
+# JSON, with a `{"__pbe_bin": [type, byte offset, length]}` marker in place of each vector. A vector
+# goes in the asset when it has at least `get_slate_asset_min_length()` numbers.
 const BIN_TYPES = Dict(Float64 => "Float64Array", Float32 => "Float32Array", Int32 => "Int32Array",
     Int16 => "Int16Array", Int8 => "Int8Array", UInt8 => "Uint8Array", UInt16 => "Uint16Array",
     UInt32 => "Uint32Array")
@@ -43,15 +43,23 @@ function _bin!(blob::IOBuffer, v::AbstractVector{<:BinNumber})
     return Dict("__pbe_bin" => (BIN_TYPES[eltype(a)], offset, length(a)))
 end
 
-_split!(blob, x) = x
-_split!(blob, d::AbstractDict) = Dict{Any,Any}(k => _split!(blob, v) for (k, v) in d)
-function _split!(blob, x::AbstractVector)
-    T = eltype(x)
-    T <: BinNumber && return length(x) >= BIN_MIN_LENGTH ? _bin!(blob, x) : x
-    # The rows of a matrix (for example a heatmap `z`) count together.
-    T <: AbstractVector{<:BinNumber} && sum(length, x; init = 0) >= BIN_MIN_LENGTH &&
-        return map(v -> _bin!(blob, v), x)
-    return isbitstype(T) ? x : map(v -> _split!(blob, v), x)
+# The rows of a matrix (for example a heatmap `z`) count together.
+_bin_length(x::AbstractVector{<:BinNumber}) = length(x)
+_bin_length(x::AbstractVector{<:AbstractVector{<:BinNumber}}) = sum(length, x; init = 0)
+_bin_length(x) = 0
+
+# Tells if `x` has a vector for the asset. It does not allocate, so a plot with only small vectors
+# costs no copy of its data.
+_has_bin(x, n) = false
+_has_bin(d::AbstractDict, n) = any(v -> _has_bin(v, n), values(d))
+_has_bin(x::AbstractVector, n) =
+    _bin_length(x) >= n || (!isbitstype(eltype(x)) && any(v -> _has_bin(v, n), x))
+
+_split!(blob, x, n) = x
+_split!(blob, d::AbstractDict, n) = Dict{Any,Any}(k => _split!(blob, v, n) for (k, v) in d)
+function _split!(blob, x::AbstractVector, n)
+    _bin_length(x) >= n || return isbitstype(eltype(x)) ? x : map(v -> _split!(blob, v, n), x)
+    return eltype(x) <: BinNumber ? _bin!(blob, x) : map(v -> _bin!(blob, v), x)
 end
 
 struct _AssetData
@@ -83,9 +91,16 @@ end
 # an SlateExtensionsBase older than 0.11). There the data goes as JSON text.
 function PlotlyBaseExtras.to_js(::SlateHost, x::AbstractDict)
     isdefined(SlateExtensionsBase, :slate_save_asset) || return x
+    n = PlotlyBaseExtras.get_slate_asset_min_length()
+    # Only the traces and the animation frames have large vectors. The layout, with its template,
+    # stays as it is.
+    parts = filter(k -> haskey(x, k) && _has_bin(x[k], n), (:data, :frames))
+    isempty(parts) && return x
     blob = IOBuffer()
-    tree = _split!(blob, x)
-    position(blob) == 0 && return x
+    tree = copy(x)
+    for k in parts
+        tree[k] = _split!(blob, x[k], n)
+    end
     path = SlateExtensionsBase.slate_save_asset("plotly-data", take!(blob); mime = "application/octet-stream")
     return path === nothing ? x : _AssetData(tree, path)
 end
@@ -112,8 +127,10 @@ end
 PlotlyBaseExtras.PrecompileTools.@compile_workload begin
     SlateExtensionsBase.slate_render(PlotlyBaseExtras.plot(PlotlyBaseExtras.scatter(y = rand(10))))
     ctx = (; save_asset = (name, data; kw...) -> "data/plotly-data.bin")
-    task_local_storage(:slate_ctx, ctx) do
-        SlateExtensionsBase.slate_render(PlotlyBaseExtras.plot(PlotlyBaseExtras.scatter(y = rand(BIN_MIN_LENGTH))))
+    PlotlyBaseExtras.with(PlotlyBaseExtras.slate_asset_min_length => 1) do
+        task_local_storage(:slate_ctx, ctx) do
+            SlateExtensionsBase.slate_render(PlotlyBaseExtras.plot(PlotlyBaseExtras.scatter(y = rand(10))))
+        end
     end
 end
 

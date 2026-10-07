@@ -138,3 +138,23 @@ end
         PlotlyBaseExtras.Preferences.delete_preferences!(uuid, "plotly_source"; force = true)
     end
 end
+
+@testset "slate_asset_min_length chain" begin
+    @test get_slate_asset_min_length() == 10_000
+    try
+        PlotlyBaseExtras.Preferences.set_preferences!(uuid, "slate_asset_min_length" => 50_000; force = true)
+        @test get_slate_asset_min_length() == 50_000
+        change_slate_asset_min_length(typemax(Int))
+        @test get_slate_asset_min_length() == typemax(Int)
+        @test with(() -> get_slate_asset_min_length(), PlotlyBaseExtras.slate_asset_min_length => 500) == 500
+        change_slate_asset_min_length(nothing)
+        @test get_slate_asset_min_length() == 50_000
+        PlotlyBaseExtras.Preferences.set_preferences!(uuid, "slate_asset_min_length" => 0; force = true)
+        @test_throws "must be a positive integer, got 0" get_slate_asset_min_length()
+    finally
+        PlotlyBaseExtras.Preferences.delete_preferences!(uuid, "slate_asset_min_length"; force = true)
+        change_slate_asset_min_length(nothing)
+    end
+    @test_throws "must be a positive integer, got 1.5" change_slate_asset_min_length(1.5)
+    @test get_slate_asset_min_length() == 10_000
+end

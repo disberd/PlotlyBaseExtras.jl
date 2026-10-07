@@ -33,6 +33,7 @@ export PlotlyPlot, get_plotly_version, change_plotly_version,
 get_plotly_source, change_plotly_source,
 get_mathjax, change_mathjax, get_mathjax_version, change_mathjax_version,
 get_mathjax_source, change_mathjax_source,
+get_slate_asset_min_length, change_slate_asset_min_length,
 force_mathjax_local, add_plotly_listener!,
 add_class!, remove_class!, add_js_listener!, default_plotly_template,
 get_image_options, change_image_options!, plotly_paste_receiver
@@ -45,7 +46,7 @@ export sample_colorscheme, discrete_colorscale
 const PLOTLY_UUID = Base.UUID("ba01aadf-c838-43fc-827a-f1961e451c7b")
 public Host, PlainHTML, PlutoHost, VSCodeHost, current_host, render, to_js, plotly_import,
 supported_sources, auto_source, plotly_source, plotly_version,
-mathjax, mathjax_version, mathjax_source
+mathjax, mathjax_version, mathjax_source, slate_asset_min_length
 
 
 include("local_plotly_library.jl")
