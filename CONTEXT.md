@@ -17,3 +17,6 @@
   _Avoid_: detach, popped-out.
 - **Copy dialog**: the modal view that shows the exported PNG when the browser refuses a
   clipboard write. The user copies the image from it by hand. _Avoid_: paste receiver, preview.
+- **Page**: one standalone HTML file that holds one or more independent plots, each in its own
+  container. The plain HTML host shows it. A page is not one figure with subplots.
+  _Avoid_: report, dashboard, document.
