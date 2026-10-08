@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   plot draws sooner. The asset goes into the cell memo and into a static export. Where Slate keeps
   no cell assets (for example a plot in a markdown `{{ }}` interpolation), the data stays JSON.
 - A re-run in KaimonSlate, and a reactive re-run in Pluto, keep the zoom, pan, legend clicks, and
-  selection of the reader. The package sets `layout.uirevision` when the layout has none.
+  selection of the reader. The package sets a default `layout.uirevision`, but an explicit
   `Layout(uirevision = false)` restores the old behavior.
 - The compat bound of SlateExtensionsBase is now `0.10, 0.11`.
 
