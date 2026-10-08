@@ -80,8 +80,8 @@ directly, so its view state resets. The package sets `layout.uirevision` to a co
 layout has no `uirevision`. Other hosts never draw a shown plot again, so the constant has no
 effect there. A page reload resets the view state.
 
-A value that you change in Julia replaces the change of the reader. plotly keeps a change of the
-reader only while the new figure has the same value for that attribute as the old figure. For
+A value that you change in Julia replaces the change of the reader. plotly.js keeps a change of
+the reader only while the new figure has the same value for that attribute as the old figure. For
 example, a new `xaxis_range` shows after the re-run.
 
 Set `uirevision = false` in the layout to reset the view state on each re-run:
@@ -92,7 +92,7 @@ using PlotlyBaseExtras
 plot(scatter(y = rand(10)), Layout(uirevision = false))
 ```
 
-Per-part values give finer control, see the plotly reference of
+Per-part values give finer control, see the plotly.js reference of
 [`layout.uirevision`](https://plotly.com/javascript/reference/layout/#layout-uirevision). This
 plot resets the legend clicks on each re-run, and keeps the x zoom:
 
