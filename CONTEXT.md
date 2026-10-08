@@ -20,3 +20,5 @@
 - **Page**: one standalone HTML file that holds one or more independent plots, each in its own
   container. The plain HTML host shows it. A page is not one figure with subplots.
   _Avoid_: report, dashboard, document.
+- **View state**: what the reader changes on a shown plot: zoom, pan, legend clicks, selection.
+  A re-run of the plot keeps it, except a direct re-run in Pluto. _Avoid_: UI state.
