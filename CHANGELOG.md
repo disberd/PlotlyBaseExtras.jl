@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Slate cell asset. A value larger than any vector keeps all the data as JSON.
 - In a static export of a KaimonSlate notebook, a control that drives `@replay` data moves the
   plot with no kernel. All the slices of one move draw in one redraw, and the redraw keeps the zoom
-  and legend clicks of the reader.
+  and legend clicks of the reader. The replayed data can be a vector or a matrix (for example a
+  heatmap `z`).
 
 ### Changed
 
