@@ -60,3 +60,16 @@ end
     d = @test_logs (:warn, r"removed the `scattermapbox` trace type") _process_with_names(mapbox)
     @test d[:data][1][:type] == "scattermapbox"
 end
+
+@testitem "uirevision default" begin
+    using PlotlyBaseExtras: _process_with_names, PlotlyPlot
+
+    # A layout without `uirevision` gets the constant, so a re-run keeps the view state.
+    d = _process_with_names(PlotlyPlot(Plot(scatter(y = [1, 2]))))
+    @test d[:layout][:uirevision] == "plotlybaseextras"
+    # An author value always wins, `false` included: it is the opt-out.
+    d = _process_with_names(PlotlyPlot(Plot(scatter(y = [1, 2]), Layout(uirevision = 1))))
+    @test d[:layout][:uirevision] == 1
+    d = _process_with_names(PlotlyPlot(Plot(scatter(y = [1, 2]), Layout(uirevision = false))))
+    @test d[:layout][:uirevision] === false
+end

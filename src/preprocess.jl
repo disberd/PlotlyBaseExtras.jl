@@ -68,6 +68,9 @@ function _process_with_names(pp::PlotlyPlot)
         layout_template
     end
     out[:layout][:template] = _process_with_names(template, fl, AttrName(:template), AttrName(:layout))
+    # plotly keeps the view state across `Plotly.react` calls only while `uirevision` stays the same
+    # truthy value. An author value wins: `Layout(uirevision = false)` is the opt-out.
+    get!(out[:layout], :uirevision, "plotlybaseextras")
     # plotly.js 4 shows a button that sends the plot data to Plotly Cloud by default.
     out[:config][:showSendToCloud] = false
     out
