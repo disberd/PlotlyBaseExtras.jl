@@ -1,6 +1,6 @@
 function _host_script_contents(host::Host, pp::PlotlyPlot)
 	ScriptContents([
-		el == ADAPTER_SLOT ? adapter_script(host) : el
+		el == ADAPTER_SLOT ? adapter_script(host, pp) : el
 		for el in pp.script_contents.vec
 	])
 end

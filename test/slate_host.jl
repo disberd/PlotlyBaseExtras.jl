@@ -91,3 +91,18 @@ let ext = Base.get_extension(PlotlyBaseExtras, :SlateExtensionsBaseExt),
     @test !occursin("Slate.asset", html)
     @test occursin(string(trace[:y][1]), html)
 end
+
+# `@replay`: the marks of a figure, one for each `ReplayArray`, with its plotly.js attribute path and
+# its 0-based trace (`nothing` for the layout).
+let ext = Base.get_extension(PlotlyBaseExtras, :SlateExtensionsBaseExt)
+    replay(id) = SlateExtensionsBase.ReplayArray([1.0, 2.0], id, "k", 1, Any[1, 2])
+    marks(p) = Set((m["id"], m["control"], m["path"], m["trace"]) for m in ext._replay_marks(p.Plot))
+    p = plot([scatter(y = [1, 2]), scatter(y = replay("y"), marker = attr(color = replay("color")))],
+        Layout(meta = replay("meta"), annotations = [attr(text = "a"), attr(text = replay("text"))]))
+    @test marks(p) == Set([("y", "k", "y", 1), ("color", "k", "marker.color", 1),
+        ("meta", "k", "meta", nothing), ("text", "k", "annotations[1].text", nothing)])
+    # A plain figure has no marks, and its script defines an empty list.
+    @test isempty(ext._replay_marks(plot([1, 2]).Plot))
+    @test occursin("const replay_marks = [];", slate_render(plot([1, 2])).html)
+    @test occursin("\"path\":\"marker.color\"", slate_render(p).html)
+end

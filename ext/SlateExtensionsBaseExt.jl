@@ -2,14 +2,17 @@ module SlateExtensionsBaseExt
 
 using PlotlyBaseExtras
 import SlateExtensionsBase
-using SlateExtensionsBase: html_fragment, provide_assets!, ext_asset_url
+using SlateExtensionsBase: html_fragment, provide_assets!, ext_asset_url, ReplayArray
 
 struct SlateHost <: PlotlyBaseExtras.Host end
 
 PlotlyBaseExtras.supported_sources(::SlateHost) = (:cdn, :hosted)
 PlotlyBaseExtras.auto_source(::SlateHost, version) =
     VersionNumber(version) == PlotlyBaseExtras.ARTIFACT_VERSION ? :hosted : :cdn
-PlotlyBaseExtras.adapter_script(::SlateHost) = PlotlyBaseExtras.slate_adapter_script
+# The adapter reads `replay_marks`, so the script defines it before the adapter.
+PlotlyBaseExtras.adapter_script(::SlateHost, pp) =
+    "const replay_marks = " * sprint(PlotlyBaseExtras.write_js, _replay_marks(pp.Plot)) * ";\n" *
+    PlotlyBaseExtras.slate_adapter_script
 
 function PlotlyBaseExtras.plotly_import(::SlateHost, ::Val{:hosted}, version)
     if VersionNumber(version) != PlotlyBaseExtras.ARTIFACT_VERSION
@@ -117,6 +120,46 @@ function SlateExtensionsBase.slate_render(p::PlotlyBaseExtras.PlotlyPlot)
         print(io, "<div data-slate-keep=\"plotlybaseextras\" style=\"min-height: ", h isa Real ? h : 400, "px\"></div>")
         PlotlyBaseExtras.render(io, SlateHost(), p)
     end)
+end
+
+# `@replay` in a static export. A `ReplayArray` is data that the export computes for every value of a
+# control. The figure records where each one is: a trace attribute or a layout attribute, as a
+# plotly.js attribute path (`marker.color`, `meta`, `annotations[0].text`). The walk runs on the figure
+# before `_process_with_names`, which turns a `ReplayArray` into a plain array. The adapter gives these
+# marks to `Slate.replay.wire`.
+# ponytail: a replay cannot set a scalar attribute (an annotation `x`, a shape coordinate), because a
+# slice is an array. Add a `replay_scalar` wrapper (Julia writes `r[1]`, the page writes `slice[0]`)
+# when a real plot needs one.
+
+function _replay_marks(p::PlotlyBaseExtras.PlotlyBase.Plot)
+    marks = Dict{String,Any}[]
+    for (i, tr) in enumerate(p.data)
+        _replay_marks!(marks, tr.fields, "", i - 1)
+    end
+    _replay_marks!(marks, p.layout.fields, "", nothing)
+    return marks
+end
+
+_replay_marks!(marks, x, path, trace) = marks
+_replay_marks!(marks, a::PlotlyBaseExtras.PlotlyBase.AbstractPlotlyAttribute, path, trace) =
+    _replay_marks!(marks, a.fields, path, trace)
+function _replay_marks!(marks, d::AbstractDict, path, trace)
+    for (k, v) in d
+        _replay_marks!(marks, v, isempty(path) ? string(k) : string(path, ".", k), trace)
+    end
+    return marks
+end
+# A vector of attribute containers, for example `layout.annotations`. A numeric vector holds no mark.
+function _replay_marks!(marks, v::AbstractVector, path, trace)
+    eltype(v) <: Number && return marks
+    for (i, x) in enumerate(v)
+        _replay_marks!(marks, x, string(path, "[", i - 1, "]"), trace)
+    end
+    return marks
+end
+function _replay_marks!(marks, r::ReplayArray, path, trace)
+    push!(marks, Dict{String,Any}("id" => r.id, "control" => r.control, "path" => path, "trace" => trace))
+    return marks
 end
 
 # Loading SlateExtensionsBase invalidates code in the PlotlyBaseExtras package image (the `==`, `hash`

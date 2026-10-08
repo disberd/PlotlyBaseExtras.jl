@@ -20,5 +20,12 @@
 - **Page**: one standalone HTML file that holds one or more independent plots, each in its own
   container. The plain HTML host shows it. A page is not one figure with subplots.
   _Avoid_: report, dashboard, document.
+- **Replayed control**: a KaimonSlate control whose results the export computes in advance for
+  each of its values. In the export, the page moves the plot with no kernel.
+- **Mark**: one location in a figure that a replayed control changes: a trace attribute or a
+  layout attribute.
+- **Slice**: the data of one mark for one value of the replayed control.
+- **Replayed redraw**: the one redraw that shows all the slices of one move of a replayed
+  control. _Avoid_: restyle, re-run.
 - **View state**: what the reader changes on a shown plot: zoom, pan, legend clicks, selection.
   A re-run of the plot keeps it, except a direct re-run in Pluto. _Avoid_: UI state.

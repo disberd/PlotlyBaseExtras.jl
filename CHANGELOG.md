@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `slate_asset_min_length` setting (ScopedValue, `change_slate_asset_min_length`, preference
   key `slate_asset_min_length`; default 10000) sets the smallest numeric vector that goes in a
   Slate cell asset. A value larger than any vector keeps all the data as JSON.
+- In a static export of a KaimonSlate notebook, a control that drives `@replay` data moves the
+  plot with no kernel. All the slices of one move draw in one redraw, and the redraw keeps the zoom
+  and legend clicks of the reader.
 
 ### Changed
 
