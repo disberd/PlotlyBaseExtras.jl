@@ -49,9 +49,10 @@ plotly_import(::Union{PlutoHost,_PlainHTMLPage}, ::Val{:hosted}, version) = _Imp
 
 # The adapter JS and the code around the script body. The default mounts the
 # container beside the script tag in an async function, so `await import()` works.
-adapter_script(::Host) = plain_adapter_script
-adapter_script(::VSCodeHost) = vscode_adapter_script
-adapter_script(::PlutoHost) = pluto_adapter_script
+# A host adapter can also read the plot `pp` (the Slate extension does).
+adapter_script(::Host, pp) = plain_adapter_script
+adapter_script(::VSCodeHost, pp) = vscode_adapter_script
+adapter_script(::PlutoHost, pp) = pluto_adapter_script
 
 script_wrap(::Host) = ("(async (currentScript) => {", "})(document.currentScript).catch(console.error);")
 script_wrap(::PlutoHost) = ("", "return CONTAINER")

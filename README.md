@@ -71,6 +71,51 @@ using PlotlyBaseExtras
 plot(scatter(x = 1:10, y = rand(10)), Layout(title = "A plot in KaimonSlate"))
 ```
 
+#### Replayed controls in an export
+
+In a static HTML export of the notebook, a control that drives `@replay` data moves the plot with
+no Julia kernel. Put `@replay(control, expression)` where the plot takes the data: a trace
+attribute or a layout attribute. The expression gives a vector or a matrix, for example the `z` of
+a heatmap. The export computes the expression for each value of the control.
+When the reader moves the control, the page draws all the changed data in one redraw and keeps the
+zoom and legend clicks of the reader. This plot has a slider in one cell and the plot in the next
+cell:
+
+```julia
+@bind k Slider(1:10; default = 3, label = "k")
+```
+
+```julia
+plot(scatter(x = 1:10, y = @replay(k, Float64.(k .* sin.(1:10))), mode = "markers",
+             marker = attr(size = 12, color = @replay(k, Float64.(mod.(k .* (1:10), 7))))),
+     Layout(title = "k = %{meta[0]}", meta = @replay(k, [Float64(k)]), yaxis = attr(range = [-11, 11])))
+```
+
+Follow these rules for `@replay` data in a plot:
+
+- Replay numbers only. For text, such as a title, an annotation, or hover text, put the numbers
+  in `meta` and write `%{meta[0]}` in the text. A title shows the number as it is and ignores a
+  format such as `%{meta[0]:.1f}`. Round the number in Julia, for example
+  `meta = @replay(k, [round(k / 3; digits = 1)])`.
+- Compute an expensive part one time. Each `@replay` computes its own expression for each value
+  of the control. When several `@replay` use the same expensive computation, compute a table over
+  the values of the control outside `@replay`, and index the table in each `@replay`.
+- Return the same shape at each value of the control. When the export cannot replay one
+  `@replay`, for example because of an error at one value or a shape that changes with the value,
+  that part of the figure stays at the exported value while the rest moves. Pad a curve whose
+  length changes with `NaN`. plotly.js draws a gap at a `NaN`.
+- Keep the same number of traces at each value of the control. When a trace has no data at one
+  value, give it `NaN` data. A trace with only `NaN` data draws nothing.
+- Name a trace by its role, not by the value that it shows. The trace names and the legend text
+  do not change when the control moves.
+- Do not replay a scalar attribute, such as a contour level or the `x` of an annotation. The
+  export replays arrays only. To move a line with the control, draw the line as a trace with
+  `@replay` data.
+
+For a single-file export, call `change_plotly_source(:cdn)` before the plots. With the default
+`:hosted` source, the exported page loads plotly.js from the `/ext-assets/` URL of the Slate
+server, so the page draws no plot when it opens without that server.
+
 ## View state
 
 A re-run of a plot cell in KaimonSlate keeps the view state: the zoom, pan, legend clicks, and
